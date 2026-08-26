@@ -104,10 +104,10 @@ Only `Item` is required. The app writes `Reserved`, `ReservedBy` and
 
 Remaining steps:
 
-1. Rename the sheet's tab to `Items` so it matches `GOOGLE_SHEET_TAB`.
-   (A CSV import names the tab after the file, so it won't be `Items` by
-   default. Either rename the tab or set the env var to the real name —
-   they just have to agree.)
+1. Nothing to do about the tab name. `GOOGLE_SHEET_TAB` is optional and the
+   app uses the first tab when it's unset, which is right for a single-tab
+   sheet. Set it only to pick one tab out of several — and note that a CSV
+   import names the tab after the file, so it is rarely what you'd guess.
 2. Share the spreadsheet with the service account's `client_email` as
    **Editor**. Read-only is not enough; the app writes reservations back.
    Missing this share is the single most common cause of the homepage
@@ -166,7 +166,7 @@ path — no CLI, no login token, and every later push auto-deploys.
    | `GOOGLE_SERVICE_ACCOUNT_EMAIL` | `client_email` from the JSON key |
    | `GOOGLE_PRIVATE_KEY` | `private_key` from the JSON key — paste the whole thing including the `-----BEGIN/END-----` lines |
    | `GOOGLE_SHEET_ID` | the ID from the Sheet URL |
-   | `GOOGLE_SHEET_TAB` | `Items` |
+   | `GOOGLE_SHEET_TAB` | optional — omit it to use the first tab |
    | `ADMIN_PASSWORD` | your chosen `/admin` password |
    | `NEXT_PUBLIC_BASE_URL` | optional — leave it unset, see step 7 |
 
