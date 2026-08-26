@@ -82,30 +82,37 @@ doesn't get committed if you initialize a repo later).
 
 ## 3. Create and share the Google Sheet
 
-Service accounts don't have their own Drive storage, so create the sheet as
-the human's own account rather than via the service account:
+> **Status: done.** The sheet `Baby Registry — Items` exists in the owner's
+> Drive, populated with the 35 items imported from the `Liste de naissance`
+> tab of the couple's own planning workbook (name, product link, and a
+> `Category · Brand · Price` note per item). Reservation columns are empty.
+> Two things remain: renaming the tab to `Items`, and sharing it with the
+> service account. Keep the spreadsheet ID out of this repo — it goes in the
+> Vercel env vars only.
 
-1. Ask the human to open Google Sheets and create a new spreadsheet (or
-   point you to an existing one they want to reuse).
-2. Have them rename a tab to `Items` (or tell you what tab name they used —
-   that goes in `GOOGLE_SHEET_TAB`).
-3. Have them paste this header row into row 1, columns A–F exactly in this
-   order:
+Service accounts don't have their own Drive storage, so the sheet must be
+owned by a real Google account, not created by the service account.
 
-   ```
-   Item	Link	Notes	Reserved	ReservedBy	ReservedAt
-   ```
+The layout the app expects — row 1 is the header, data starts at row 2:
 
-4. If a gift list was provided in step 0, ask the human to share the sheet
-   with `$SA_EMAIL` as **Editor**, then write the items into rows 2+
-   yourself via the Sheets API using the service account credentials (a
-   short script with `googleapis`, or `curl` against
-   `https://sheets.googleapis.com/v4/spreadsheets/{id}/values/Items!A2:C:append`
-   with an OAuth2 bearer token minted from the service account key). Verify
-   by reading the range back.
-5. If no gift list yet, just confirm the sheet is shared with `$SA_EMAIL`
-   (Editor) and move on — they can fill in items later directly in Sheets.
-6. Grab the spreadsheet ID from the URL:
+```
+Item	Link	Notes	Reserved	ReservedBy	ReservedAt
+```
+
+Only `Item` is required. The app writes `Reserved`, `ReservedBy` and
+`ReservedAt` itself when a guest claims something; leave them empty.
+
+Remaining steps:
+
+1. Rename the sheet's tab to `Items` so it matches `GOOGLE_SHEET_TAB`.
+   (A CSV import names the tab after the file, so it won't be `Items` by
+   default. Either rename the tab or set the env var to the real name —
+   they just have to agree.)
+2. Share the spreadsheet with the service account's `client_email` as
+   **Editor**. Read-only is not enough; the app writes reservations back.
+   Missing this share is the single most common cause of the homepage
+   showing "couldn't load the list".
+3. Grab the spreadsheet ID from the URL for `GOOGLE_SHEET_ID`:
    `https://docs.google.com/spreadsheets/d/`**`THIS_PART`**`/edit`
 
 ## 4. Populate environment variables
@@ -143,42 +150,78 @@ If the homepage shows a "couldn't load the list" error instead of items,
 the Sheets credentials or sharing step is wrong — fix before deploying, not
 after.
 
-## 6. Deploy to Vercel
+## 6. Deploy to Vercel via the GitHub import
 
-```bash
-npm i -g vercel   # if not already installed
-vercel login      # human completes browser OAuth if not already logged in
-cd ~/projects/baby-registry
-vercel link --yes # or omit --yes if it needs to prompt for project name
+The repo already lives on GitHub, so the browser import is the shortest
+path — no CLI, no login token, and every later push auto-deploys.
 
-for key in GOOGLE_SERVICE_ACCOUNT_EMAIL GOOGLE_SHEET_ID GOOGLE_SHEET_TAB ADMIN_PASSWORD; do
-  vercel env add "$key" production <<< "$(grep "^$key=" .env.local | cut -d= -f2-)"
-done
-# GOOGLE_PRIVATE_KEY needs the multiline value — pipe it in directly:
-grep "^GOOGLE_PRIVATE_KEY=" .env.local | cut -d= -f2- | vercel env add GOOGLE_PRIVATE_KEY production
+1. Go to [vercel.com/new](https://vercel.com/new) and import
+   `NoZiL/gift-registry`. Vercel detects Next.js on its own; leave the
+   build settings alone.
+2. Before clicking **Deploy**, expand **Environment Variables** and add all
+   six from `.env.example`:
 
-vercel --prod
-```
+   | Variable | Value |
+   |---|---|
+   | `GOOGLE_SERVICE_ACCOUNT_EMAIL` | `client_email` from the JSON key |
+   | `GOOGLE_PRIVATE_KEY` | `private_key` from the JSON key — paste the whole thing including the `-----BEGIN/END-----` lines |
+   | `GOOGLE_SHEET_ID` | the ID from the Sheet URL |
+   | `GOOGLE_SHEET_TAB` | `Items` |
+   | `ADMIN_PASSWORD` | your chosen `/admin` password |
+   | `NEXT_PUBLIC_BASE_URL` | leave blank for now — step 7 |
 
-Note the resulting production URL (e.g. `https://baby-registry-xyz.vercel.app`).
+   Pasting `GOOGLE_PRIVATE_KEY` into the dashboard is the one place the
+   `\n`-escape confusion disappears: paste the real multi-line key and
+   Vercel stores it verbatim. `lib/sheets.js` handles both forms.
+3. Deploy, and note the production URL.
 
-## 7. Fix the base URL and redeploy
+Cost note: the Hobby plan is free and includes custom domains. It is
+licensed for non-commercial use only, which a family registry satisfies.
 
-The admin page needs to know its own public URL to build correct guest
-links:
+## 7. Set the base URL and redeploy
 
-```bash
-echo "https://<your-real-url>.vercel.app" | vercel env add NEXT_PUBLIC_BASE_URL production
-vercel --prod
-```
+`/admin` needs to know its own public URL to build guest links. In
+Settings → Environment Variables, set `NEXT_PUBLIC_BASE_URL` to the final
+public URL — the custom domain if you're doing step 7b, otherwise the
+`.vercel.app` one — with no trailing slash. This is a
+`NEXT_PUBLIC_*` variable, so it is baked in at build time: you must
+**redeploy** after changing it, not just save it.
+
+### 7b. Custom domain on Cloudflare DNS
+
+1. Vercel → project → Settings → Domains → add the domain. Vercel shows
+   the exact A/CNAME record to create; use the values it gives you rather
+   than any hardcoded IP, since these have changed over time.
+2. In Cloudflare DNS, create that record and set it to **DNS only (grey
+   cloud), not Proxied (orange cloud)**.
+
+   This is the step that silently breaks deploys. With the proxy on,
+   Cloudflare terminates TLS itself, Vercel can never complete its
+   Let's Encrypt challenge, and the certificate simply never issues — the
+   domain sits broken with no obvious error. Grey cloud it.
+3. Wait for Vercel to report the domain as Valid, then redeploy so
+   `NEXT_PUBLIC_BASE_URL` picks up the custom domain.
+
+Note that the app stays publicly reachable at its `*.vercel.app` URL even
+after a custom domain is attached; that cannot be disabled on Hobby. The
+registry is world-readable to anyone who knows either URL, which matches
+the app's existing "trusted guest list, not adversarial" threat model.
 
 ## 8. Verify the live deployment
 
 ```bash
-BASE="https://<your-real-url>.vercel.app"
+BASE="https://<your-real-url>"
 curl -s -o /dev/null -w "%{http_code}\n" "$BASE/"        # expect 200
 curl -s -o /dev/null -w "%{http_code}\n" "$BASE/admin"   # expect 200
 curl -s -o /dev/null -w "%{http_code}\n" "$BASE/api/qr?text=test"  # expect 200
+```
+
+A 200 on `/` only means the page rendered — it renders fine with a
+"couldn't load the list" error too. Confirm the items themselves are
+there, which is the real test of the credentials and the sheet share:
+
+```bash
+curl -s "$BASE/" | grep -c "I'll bring this"   # expect the item count, not 0
 ```
 
 Then ask the human to open `$BASE/admin` in their own browser, log in with
