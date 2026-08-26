@@ -32,6 +32,12 @@ h1 {
   margin: 0 0 8px;
 }
 
+.intro {
+  color: var(--ink);
+  margin: 0 0 16px;
+  line-height: 1.55;
+}
+
 .sub {
   color: var(--sub);
   margin: 0 0 24px;

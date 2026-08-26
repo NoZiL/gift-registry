@@ -1,13 +1,13 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Baby Registry",
-  description: "Reserve something from the list",
+  title: "Liste de naissance",
+  description: "Réservez un cadeau de la liste",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="fr">
       <body>{children}</body>
     </html>
   );

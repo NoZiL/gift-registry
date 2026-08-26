@@ -11,7 +11,7 @@ export default function ReserveList({ items, guestName: initialGuestName }) {
   async function handleReserve(id) {
     const name = (initialGuestName || nameDraft).trim();
     if (!name) {
-      setError("Add your name first so we know who's bringing it.");
+      setError("Indiquez votre nom pour qu'on sache qui apporte quoi.");
       return;
     }
     setError("");
@@ -26,13 +26,13 @@ export default function ReserveList({ items, guestName: initialGuestName }) {
       if (data.ok) {
         setClaimed((c) => ({ ...c, [id]: true }));
       } else if (data.reason === "already_reserved") {
-        setError(`Someone beat you to it — already claimed by ${data.reservedBy}.`);
+        setError(`Quelqu'un a été plus rapide — déjà réservé par ${data.reservedBy}.`);
         setClaimed((c) => ({ ...c, [id]: true }));
       } else {
-        setError("Something went wrong — try again.");
+        setError("Une erreur est survenue — merci de réessayer.");
       }
     } catch {
-      setError("Something went wrong — try again.");
+      setError("Une erreur est survenue — merci de réessayer.");
     } finally {
       setBusyId(null);
     }
@@ -44,12 +44,12 @@ export default function ReserveList({ items, guestName: initialGuestName }) {
     <div>
       {!initialGuestName && (
         <div className="name-box">
-          <label htmlFor="name">Your name</label>
+          <label htmlFor="name">Votre nom</label>
           <input
             id="name"
             value={nameDraft}
             onChange={(e) => setNameDraft(e.target.value)}
-            placeholder="e.g. Grandma Linda"
+            placeholder="ex. Mamie Christiane"
           />
         </div>
       )}
@@ -69,19 +69,19 @@ export default function ReserveList({ items, guestName: initialGuestName }) {
                   rel="noopener noreferrer"
                   className="item-link"
                 >
-                  View item ↗
+                  Voir l'article ↗
                 </a>
               )}
             </div>
             <button onClick={() => handleReserve(item.id)} disabled={busyId === item.id}>
-              {busyId === item.id ? "Saving…" : "I'll bring this"}
+              {busyId === item.id ? "Enregistrement…" : "Je m'en occupe"}
             </button>
           </li>
         ))}
       </ul>
 
       {visible.length === 0 && items.length > 0 && (
-        <p className="empty">Thanks for claiming that — you're all set! 💛</p>
+        <p className="empty">Merci d'avoir réservé — c'est noté ! 💛</p>
       )}
     </div>
   );

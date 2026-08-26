@@ -139,7 +139,7 @@ quotes intact — a common source of "invalid key" errors later.
 npm run build
 npm run start -- -p 3100 &
 sleep 3
-curl -s http://localhost:3100/ | grep -q "Baby Registry" && echo "homepage OK"
+curl -s http://localhost:3100/ | grep -q "Liste de naissance" && echo "homepage OK"
 curl -s -X POST http://localhost:3100/api/admin-auth \
   -H "Content-Type: application/json" \
   -d "{\"password\":\"<the real password>\"}" # expect {"ok":true}
@@ -221,7 +221,7 @@ A 200 on `/` only means the page rendered — it renders fine with a
 there, which is the real test of the credentials and the sheet share:
 
 ```bash
-curl -s "$BASE/" | grep -c "I'll bring this"   # expect the item count, not 0
+curl -s "$BASE/" | grep -c "Je m'en occupe"   # expect the item count, not 0
 ```
 
 Then ask the human to open `$BASE/admin` in their own browser, log in with

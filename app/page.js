@@ -9,33 +9,40 @@ export default async function Home({ searchParams }) {
   const guestName = (resolvedParams?.g || "").toString().trim().slice(0, 80);
 
   let items = [];
-  let loadError = null;
+  let loadFailed = false;
   try {
     items = await getItems();
   } catch (err) {
-    loadError = err.message;
+    // Log the detail server-side; guests only ever see a generic message, so
+    // a misconfigured sheet can't leak the service account address publicly.
+    console.error("Failed to load items from the sheet", err);
+    loadFailed = true;
   }
 
   const available = items.filter((i) => !i.reserved);
 
   return (
     <main className="wrap">
-      <h1>Baby Registry</h1>
+      <h1>Liste de naissance</h1>
+      <p className="intro">
+        Voici une petite liste des essentiels dont nous aurons (réellement)
+        besoin. Merci beaucoup de vouloir nous accompagner dans cette aventure !
+      </p>
       <p className="sub">
         {guestName
-          ? `Hi ${guestName} — tap "I'll bring this" on anything you'd like to take care of.`
-          : "Tap \"I'll bring this\" on anything you'd like to take care of."}
+          ? `Bonjour ${guestName} — touchez « Je m'en occupe » sur ce que vous aimeriez apporter.`
+          : "Touchez « Je m'en occupe » sur ce que vous aimeriez apporter."}
       </p>
 
-      {loadError && (
+      {loadFailed && (
         <p className="error">
-          Couldn't load the list right now. (The couple should check the app's setup —
-          error: {loadError})
+          Impossible de charger la liste pour le moment. Merci de réessayer dans
+          un instant.
         </p>
       )}
 
-      {!loadError && available.length === 0 && (
-        <p className="empty">Everything on the list has been claimed — thank you! 💛</p>
+      {!loadFailed && available.length === 0 && (
+        <p className="empty">Tout a été réservé — merci beaucoup ! 💛</p>
       )}
 
       <ReserveList items={available} guestName={guestName} />
