@@ -168,7 +168,7 @@ path — no CLI, no login token, and every later push auto-deploys.
    | `GOOGLE_SHEET_ID` | the ID from the Sheet URL |
    | `GOOGLE_SHEET_TAB` | `Items` |
    | `ADMIN_PASSWORD` | your chosen `/admin` password |
-   | `NEXT_PUBLIC_BASE_URL` | leave blank for now — step 7 |
+   | `NEXT_PUBLIC_BASE_URL` | optional — leave it unset, see step 7 |
 
    Pasting `GOOGLE_PRIVATE_KEY` into the dashboard is the one place the
    `\n`-escape confusion disappears: paste the real multi-line key and
@@ -178,14 +178,23 @@ path — no CLI, no login token, and every later push auto-deploys.
 Cost note: the Hobby plan is free and includes custom domains. It is
 licensed for non-commercial use only, which a family registry satisfies.
 
-## 7. Set the base URL and redeploy
+## 7. The base URL (usually nothing to do)
 
-`/admin` needs to know its own public URL to build guest links. In
-Settings → Environment Variables, set `NEXT_PUBLIC_BASE_URL` to the final
-public URL — the custom domain if you're doing step 7b, otherwise the
-`.vercel.app` one — with no trailing slash. This is a
-`NEXT_PUBLIC_*` variable, so it is baked in at build time: you must
-**redeploy** after changing it, not just save it.
+`/admin` needs a public URL to build guest links from, but it falls back to
+`window.location.origin` when `NEXT_PUBLIC_BASE_URL` is unset:
+
+```js
+process.env.NEXT_PUBLIC_BASE_URL || window.location.origin
+```
+
+So leaving it unset is the sane default. Guest links are then built from
+whatever origin you have `/admin` open at — the `.vercel.app` URL today,
+your custom domain once step 7b is done, with no redeploy in between.
+
+Set it explicitly only to pin links to one domain regardless of where
+`/admin` is opened. If you do set it, use no trailing slash, and note that
+`NEXT_PUBLIC_*` values are read at build time — **redeploy** after changing
+it, saving alone won't take effect.
 
 ### 7b. Custom domain on Cloudflare DNS
 
@@ -199,8 +208,9 @@ public URL — the custom domain if you're doing step 7b, otherwise the
    Cloudflare terminates TLS itself, Vercel can never complete its
    Let's Encrypt challenge, and the certificate simply never issues — the
    domain sits broken with no obvious error. Grey cloud it.
-3. Wait for Vercel to report the domain as Valid, then redeploy so
-   `NEXT_PUBLIC_BASE_URL` picks up the custom domain.
+3. Wait for Vercel to report the domain as Valid. If you left
+   `NEXT_PUBLIC_BASE_URL` unset, there is nothing further to do — just open
+   `/admin` at the custom domain and generated links will use it.
 
 Note that the app stays publicly reachable at its `*.vercel.app` URL even
 after a custom domain is attached; that cannot be disabled on Hobby. The
