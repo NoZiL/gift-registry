@@ -1,17 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { sanitizeName } from "../lib/guestName";
 
-export default function ReserveList({ items, guestName: initialGuestName }) {
+export default function ReserveList({ items, guestName, onNameMissing }) {
   const [claimed, setClaimed] = useState({}); // id -> true once handled this session
-  const [nameDraft, setNameDraft] = useState(initialGuestName || "");
   const [busyId, setBusyId] = useState(null);
   const [error, setError] = useState("");
 
   async function handleReserve(id) {
-    const name = (initialGuestName || nameDraft).trim();
+    const name = sanitizeName(guestName);
     if (!name) {
       setError("Indiquez votre nom pour qu'on sache qui apporte quoi.");
+      onNameMissing?.();
       return;
     }
     setError("");
@@ -42,18 +43,6 @@ export default function ReserveList({ items, guestName: initialGuestName }) {
 
   return (
     <div>
-      {!initialGuestName && (
-        <div className="name-box">
-          <label htmlFor="name">Votre nom</label>
-          <input
-            id="name"
-            value={nameDraft}
-            onChange={(e) => setNameDraft(e.target.value)}
-            placeholder="ex. Mamie Christiane"
-          />
-        </div>
-      )}
-
       {error && <p className="error">{error}</p>}
 
       <ul className="items">
