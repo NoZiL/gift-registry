@@ -1,24 +1,32 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { NAME_MAX, sanitizeName } from "../lib/guestName";
+import { useEffect, useRef } from "react";
+import { NAME_MAX } from "../lib/guestName";
 
 // The name in view mode, with a way into edit mode. State lives in the parent
-// so the greeting and the reserve calls always see the same name.
-export default function GuestName({ name, editing, onEdit, onCancel, onSave }) {
-  const [draft, setDraft] = useState(name);
+// so the greeting, the editor and the reserve calls all read the same name.
+export default function GuestName({
+  name,
+  draft,
+  editing,
+  onDraftChange,
+  onEdit,
+  onCancel,
+  onSave,
+}) {
   const inputRef = useRef(null);
+  const wasEditing = useRef(editing);
 
-  // Opening the editor starts from the name in use, never a stale draft.
+  // Focus only when the editor is *opened*, never on mount: a plain first
+  // visit already starts in edit mode, and stealing focus there scrolls the
+  // list away and pops the keyboard open on mobile.
   useEffect(() => {
-    if (!editing) return;
-    setDraft(name);
-    const input = inputRef.current;
-    if (input) {
-      input.focus();
-      input.select();
+    if (editing && !wasEditing.current) {
+      inputRef.current?.focus();
+      inputRef.current?.select();
     }
-  }, [editing, name]);
+    wasEditing.current = editing;
+  }, [editing]);
 
   if (!editing) {
     return (
@@ -39,7 +47,7 @@ export default function GuestName({ name, editing, onEdit, onCancel, onSave }) {
       className="name-box"
       onSubmit={(e) => {
         e.preventDefault();
-        onSave(sanitizeName(draft));
+        onSave(draft);
       }}
     >
       <label htmlFor="guest-name">Votre nom</label>
@@ -48,7 +56,7 @@ export default function GuestName({ name, editing, onEdit, onCancel, onSave }) {
         ref={inputRef}
         value={draft}
         maxLength={NAME_MAX}
-        onChange={(e) => setDraft(e.target.value)}
+        onChange={(e) => onDraftChange(e.target.value)}
         placeholder="ex. Mamie Christiane"
       />
       <div className="name-box-actions">
