@@ -1,17 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-export default function ReserveList({ items, guestName: initialGuestName }) {
+const NAME_REQUIRED = "Indiquez votre nom pour qu'on sache qui apporte quoi.";
+
+export default function ReserveList({ items, guestName, resolveName }) {
   const [claimed, setClaimed] = useState({}); // id -> true once handled this session
-  const [nameDraft, setNameDraft] = useState(initialGuestName || "");
   const [busyId, setBusyId] = useState(null);
   const [error, setError] = useState("");
 
+  // Stop nagging for a name the moment there is one — otherwise the prompt
+  // sits there until the next claim attempt. Other errors still stand.
+  useEffect(() => {
+    if (guestName) setError((e) => (e === NAME_REQUIRED ? "" : e));
+  }, [guestName]);
+
   async function handleReserve(id) {
-    const name = (initialGuestName || nameDraft).trim();
+    const name = resolveName();
     if (!name) {
-      setError("Indiquez votre nom pour qu'on sache qui apporte quoi.");
+      setError(NAME_REQUIRED);
       return;
     }
     setError("");
@@ -42,18 +49,6 @@ export default function ReserveList({ items, guestName: initialGuestName }) {
 
   return (
     <div>
-      {!initialGuestName && (
-        <div className="name-box">
-          <label htmlFor="name">Votre nom</label>
-          <input
-            id="name"
-            value={nameDraft}
-            onChange={(e) => setNameDraft(e.target.value)}
-            placeholder="ex. Mamie Christiane"
-          />
-        </div>
-      )}
-
       {error && <p className="error">{error}</p>}
 
       <ul className="items">

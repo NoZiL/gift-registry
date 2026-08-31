@@ -22,6 +22,15 @@ weddings, ...) rather than generalizing up front.
   link pre-fills their name, so claiming is a single tap.
 - Anyone without a personalized link can still use the plain link and type
   their name in first.
+- The name is always changeable. It shows as a small "you're reserving as
+  ..." line with a **Modifier** link next to it; that opens an editor, and
+  saving updates the name everywhere. A guest who got the wrong link, or
+  shares a tablet with someone else, can fix it without help.
+- Once set, the name is remembered in the browser (`localStorage`), so the
+  plain link works like a personalized one on the next visit. A `?g=` link is
+  an explicit choice, so it wins over the remembered name and replaces it.
+  Saving a new name also rewrites `?g=` in the address bar, so a refresh
+  doesn't bring back the name that was just replaced.
 - Claims are re-checked against the sheet at the moment of writing, so two
   people tapping the same item at nearly the same time can't both "win."
 
@@ -105,9 +114,9 @@ Send the link by text/email, or print the QR code for a shower.
 - This is intentionally lightweight for a private family list — the `/admin`
   password is a deterrent, not bank-grade security. Don't reuse a sensitive
   password for it.
-- A guest's "identity" is just their name in the link — nothing stops
-  someone from editing the URL to claim as a different name. Fine for a
-  trusted guest list; not meant for a public/adversarial audience.
+- A guest's "identity" is just a name they can edit — nothing stops someone
+  from typing (or putting in the URL) a different one. Fine for a trusted
+  guest list; not meant for a public/adversarial audience.
 - If you'd rather not deploy this yourselves, mention it and it can be
   walked through interactively, or deployed directly given the right
   credentials.
