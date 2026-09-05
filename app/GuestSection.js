@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import GuestName from "./GuestName";
+import ReservationRecap from "./ReservationRecap";
 import ReserveList from "./ReserveList";
 import {
   readStoredName,
@@ -16,6 +17,16 @@ export default function GuestSection({ items, urlName }) {
   const [name, setName] = useState(urlName);
   const [draft, setDraft] = useState(urlName);
   const [editing, setEditing] = useState(!urlName);
+
+  // The page was rendered from the items that were free at that moment, so
+  // claiming and releasing are tracked here rather than by re-rendering it:
+  // `hidden` drops what was just claimed, `restored` puts back what was just
+  // released — including an item claimed on an earlier visit, which the server
+  // never sent us in the first place.
+  const [hidden, setHidden] = useState({});
+  const [restored, setRestored] = useState({});
+  // Bumped whenever the sheet changed under the recap, so it re-reads.
+  const [recapVersion, setRecapVersion] = useState(0);
 
   useEffect(() => {
     // A personalized link is an explicit choice, so it wins over whatever the
@@ -54,6 +65,29 @@ export default function GuestSection({ items, urlName }) {
     return clean ? commit(clean) : "";
   }
 
+  // `mine` is false when someone else got there first: the item still leaves
+  // the list, but there's nothing new in the recap to go and read.
+  function handleClaimed(id, mine) {
+    setHidden((h) => ({ ...h, [id]: true }));
+    setRestored((r) => {
+      if (!(id in r)) return r;
+      const next = { ...r };
+      delete next[id];
+      return next;
+    });
+    if (mine) setRecapVersion((v) => v + 1);
+  }
+
+  function handleReleased(item) {
+    setHidden((h) => {
+      if (!(item.id in h)) return h;
+      const next = { ...h };
+      delete next[item.id];
+      return next;
+    });
+    setRestored((r) => ({ ...r, [item.id]: item }));
+  }
+
   return (
     <>
       <p className="sub">
@@ -78,7 +112,20 @@ export default function GuestSection({ items, urlName }) {
         onSave={commit}
       />
 
-      <ReserveList items={items} guestName={name} resolveName={resolveName} />
+      <ReservationRecap
+        name={name}
+        version={recapVersion}
+        onReleased={handleReleased}
+      />
+
+      <ReserveList
+        items={items}
+        hidden={hidden}
+        restored={restored}
+        guestName={name}
+        resolveName={resolveName}
+        onClaimed={handleClaimed}
+      />
     </>
   );
 }

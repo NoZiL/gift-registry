@@ -33,6 +33,14 @@ weddings, ...) rather than generalizing up front.
   doesn't bring back the name that was just replaced.
 - Claims are re-checked against the sheet at the moment of writing, so two
   people tapping the same item at nearly the same time can't both "win."
+- Once a guest has claimed something, a **Vos réservations** recap appears
+  above the list: what they've taken, what each one costs, and the total. Each
+  line has an **Annuler** button that hands the item straight back to the list.
+  A guest can only release what's reserved in their own name.
+- Prices are read from the optional `Price` column, or — for a list imported
+  with the price folded into the note text ("Poussette · Yoyo · 450 €") —
+  from the `Notes`. Items with no recognizable price still show up in the
+  recap, they just don't count toward the total, and the recap says so.
 
 ## 1. Set up the Google Sheet
 
@@ -41,13 +49,16 @@ weddings, ...) rather than generalizing up front.
 2. Name a tab (default expected name: `Items`) and add this header row,
    exactly in this column order:
 
-   | A | B | C | D | E | F |
-   |---|---|---|---|---|---|
-   | Item | Link | Notes | Reserved | ReservedBy | ReservedAt |
+   | A | B | C | D | E | F | G |
+   |---|---|---|---|---|---|---|
+   | Item | Link | Notes | Reserved | ReservedBy | ReservedAt | Price |
 
 3. Starting on row 2, add one row per gift idea. Only **Item** is required —
    `Link` (e.g. an Amazon URL) and `Notes` are optional. Leave `Reserved`,
    `ReservedBy`, and `ReservedAt` blank; the app fills those in.
+   `Price` is optional too: fill it in (`450`, `45,90 €`) and the recap totals
+   it. Leave the whole column off and the app falls back to reading a price
+   out of the note, which is what an imported list usually carries.
 4. Copy the Sheet ID out of the URL:
    `https://docs.google.com/spreadsheets/d/`**`THIS_PART`**`/edit`
 
@@ -116,7 +127,11 @@ Send the link by text/email, or print the QR code for a shower.
   password for it.
 - A guest's "identity" is just a name they can edit — nothing stops someone
   from typing (or putting in the URL) a different one. Fine for a trusted
-  guest list; not meant for a public/adversarial audience.
+  guest list; not meant for a public/adversarial audience. The recap and the
+  **Annuler** button follow from the same rule: they show and release what is
+  reserved under the name currently in use (matched ignoring case, accents and
+  extra spaces), so a guest who renames themselves stops seeing what they
+  claimed under the old name.
 - If you'd rather not deploy this yourselves, mention it and it can be
   walked through interactively, or deployed directly given the right
   credentials.

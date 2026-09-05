@@ -96,8 +96,11 @@ owned by a real Google account, not created by the service account.
 The layout the app expects — row 1 is the header, data starts at row 2:
 
 ```
-Item	Link	Notes	Reserved	ReservedBy	ReservedAt
+Item	Link	Notes	Reserved	ReservedBy	ReservedAt	Price
 ```
+
+`Price` is optional — the imported items already carry theirs inside the
+`Notes` text, and the app reads it from there when the column is empty.
 
 Only `Item` is required. The app writes `Reserved`, `ReservedBy` and
 `ReservedAt` itself when a guest claims something; leave them empty.

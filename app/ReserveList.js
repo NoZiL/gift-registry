@@ -4,8 +4,14 @@ import { useEffect, useState } from "react";
 
 const NAME_REQUIRED = "Indiquez votre nom pour qu'on sache qui apporte quoi.";
 
-export default function ReserveList({ items, guestName, resolveName }) {
-  const [claimed, setClaimed] = useState({}); // id -> true once handled this session
+export default function ReserveList({
+  items,
+  hidden,
+  restored,
+  guestName,
+  resolveName,
+  onClaimed,
+}) {
   const [busyId, setBusyId] = useState(null);
   const [error, setError] = useState("");
 
@@ -31,10 +37,10 @@ export default function ReserveList({ items, guestName, resolveName }) {
       });
       const data = await res.json();
       if (data.ok) {
-        setClaimed((c) => ({ ...c, [id]: true }));
+        onClaimed(id, true);
       } else if (data.reason === "already_reserved") {
         setError(`Quelqu'un a été plus rapide — déjà réservé par ${data.reservedBy}.`);
-        setClaimed((c) => ({ ...c, [id]: true }));
+        onClaimed(id, false);
       } else {
         setError("Une erreur est survenue — merci de réessayer.");
       }
@@ -45,7 +51,15 @@ export default function ReserveList({ items, guestName, resolveName }) {
     }
   }
 
-  const visible = items.filter((i) => !claimed[i.id]);
+  // Items released this visit rejoin the ones the page was rendered with. The
+  // id is the sheet's row number, so sorting by it restores the sheet's order
+  // whichever way an item got here.
+  const byId = new Map();
+  for (const item of items) if (!hidden[item.id]) byId.set(item.id, item);
+  for (const item of Object.values(restored)) {
+    if (!hidden[item.id]) byId.set(item.id, item);
+  }
+  const visible = [...byId.values()].sort((a, b) => a.id - b.id);
 
   return (
     <div>
