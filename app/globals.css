@@ -36,6 +36,9 @@ h1 {
   color: var(--ink);
   margin: 0 0 16px;
   line-height: 1.55;
+  /* The intro comes from a spreadsheet cell, where the line breaks were typed
+     on purpose. */
+  white-space: pre-line;
 }
 
 .sub {
@@ -168,9 +171,33 @@ input:focus {
   font-size: 1.02rem;
 }
 
+.group + .group {
+  margin-top: 28px;
+}
+
+.group-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sub);
+  margin: 0 0 10px;
+}
+
+.item-meta {
+  color: var(--sub);
+  font-size: 0.88rem;
+}
+
+.item-price {
+  font-weight: 600;
+  color: var(--ink);
+}
+
 .item-notes {
   color: var(--sub);
   font-size: 0.88rem;
+  white-space: pre-line;
 }
 
 .item-link {
