@@ -96,12 +96,15 @@ owned by a real Google account, not created by the service account.
 The layout the app expects — row 1 is the header, data starts at row 2:
 
 ```
-Item	Link	Notes	Reserved	ReservedBy	ReservedAt	Category	Price
+Item	Link	Notes	Reserved	ReservedBy	ReservedAt	Category	Price	Image
 ```
 
-`Category` and `Price` are optional, and an existing sheet without them keeps
-working. Filling them in is what turns on the filters, the grouped sections,
-and the total in each guest's reservation recap.
+`Category`, `Price` and `Image` are optional, and an existing sheet without
+them keeps working. Filling in `Category` and `Price` is what turns on the
+filters, the grouped sections, and the total in each guest's reservation
+recap. `Image` takes the address of a photo for the item's thumbnail; left
+empty, the app falls back to the preview image published by whatever is in
+`Link`, so the cards have pictures either way.
 
 Only `Item` is required. The app writes `Reserved`, `ReservedBy` and
 `ReservedAt` itself when a guest claims something; leave them empty.

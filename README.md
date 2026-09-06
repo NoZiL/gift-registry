@@ -21,6 +21,11 @@ weddings, ...) rather than generalizing up front.
   both drive the browsing UI: items are grouped into collapsible sections by
   category, and guests can narrow the list by category and by a min/max price
   range. See [Categories and prices](#categories-and-prices).
+- Every item shows a small **picture**, so the list can be skimmed instead of
+  read. Paste a photo URL in the `Image` column and that's what's used; leave
+  it empty and the app pulls the preview image off the item's own `Link`, the
+  way a chat app previews a pasted URL. Items with neither keep a discreet 🎁
+  placeholder. See [Photos and link previews](#photos-and-link-previews).
 - `/admin` (password protected) generates a personal link + QR code per
   guest — e.g. `https://your-app.vercel.app/?g=Grandma%20Linda`. Opening that
   link pre-fills their name, so claiming is a single tap.
@@ -52,20 +57,21 @@ weddings, ...) rather than generalizing up front.
 2. Name a tab (default expected name: `Items`) and add this header row,
    exactly in this column order:
 
-   | A | B | C | D | E | F | G | H |
-   |---|---|---|---|---|---|---|---|
-   | Item | Link | Notes | Reserved | ReservedBy | ReservedAt | Category | Price |
+   | A | B | C | D | E | F | G | H | I |
+   |---|---|---|---|---|---|---|---|---|
+   | Item | Link | Notes | Reserved | ReservedBy | ReservedAt | Category | Price | Image |
 
 3. Starting on row 2, add one row per gift idea. Only **Item** is required —
-   `Link` (e.g. an Amazon URL), `Notes`, `Category` and `Price` are all
-   optional. Leave `Reserved`, `ReservedBy`, and `ReservedAt` blank; the app
-   fills those in.
+   `Link` (e.g. an Amazon URL), `Notes`, `Category`, `Price` and `Image` are
+   all optional. Leave `Reserved`, `ReservedBy`, and `ReservedAt` blank; the
+   app fills those in.
 
-   > **Already running an older sheet?** `Category` and `Price` were added
-   > after the fact, which is exactly why they sit at the end instead of next
-   > to `Item`. An existing sheet keeps working untouched — both columns just
-   > read as empty. Add the two headers in G and H whenever you want the
-   > filters and the grouped sections.
+   > **Already running an older sheet?** `Category`, `Price` and `Image` were
+   > added after the fact, which is exactly why they sit at the end instead of
+   > next to `Item`. An existing sheet keeps working untouched — the extra
+   > columns just read as empty. Add the headers in G and H whenever you want
+   > the filters and the grouped sections, and I whenever you want to pick the
+   > pictures yourself.
 4. Copy the Sheet ID out of the URL:
    `https://docs.google.com/spreadsheets/d/`**`THIS_PART`**`/edit`
 
@@ -162,6 +168,37 @@ Two things worth knowing about how the filters behave:
 - Setting a min or max hides items that have no price, since there's no honest
   way to place them in a range. The app says how many are hidden right under
   the filters, so nobody wonders where something went.
+
+## Photos and link previews
+
+Every card carries a thumbnail, and the app looks for one in two places, in
+this order.
+
+**1. The `Image` column (column I).** Paste the address of a picture — right
+click an image in your browser and "Copy image address" — and that's what the
+card shows. This always wins: it's your choice, it costs no extra request, and
+it's the way to fix an item whose shop advertises a bad picture (a logo, a
+banner, the wrong colourway).
+
+A Google Drive share link works too. Drive hands you a link to its *viewer*
+page rather than to the file, so the app rewrites it to Drive's thumbnail
+address for you — just make sure the file itself is shared with "anyone with
+the link", or nobody but you will see it.
+
+**2. The item's `Link`.** With `Image` empty, the app fetches the shop's page
+and reads the preview picture it publishes for exactly this purpose (its
+`og:image`) — the same picture you get when you paste that link into a chat
+app. This happens per card as it scrolls into view, and the answer is cached,
+so a page of thirty items doesn't turn into thirty requests on every visit.
+
+Only links already in your sheet are ever fetched: the page asks for a preview
+by row number, not by URL, so the endpoint can't be aimed at anything you
+didn't put there yourself.
+
+Not every shop plays along — some publish no preview image, some block
+non-browser visitors, some serve pictures that refuse to be shown on another
+site. Any of those leaves the card with its 🎁 placeholder, which is the cue
+to fill in `Image` by hand for that row.
 
 ## Notes & limits
 

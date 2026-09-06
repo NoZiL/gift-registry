@@ -254,11 +254,43 @@ input:focus {
   gap: 12px;
 }
 
+/* The picture keeps its size whatever the card holds; the text block is the
+   part that gives way. */
+.thumb {
+  flex: none;
+  width: 60px;
+  height: 60px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Product shots come in every shape and aspect ratio, and most sit on white.
+   `contain` keeps the whole object visible on the card's own background rather
+   than cropping into the middle of it. */
+.thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #fff;
+}
+
+.thumb-fallback {
+  font-size: 1.35rem;
+  line-height: 1;
+  opacity: 0.55;
+}
+
 .item-main {
   display: flex;
   flex-direction: column;
   gap: 4px;
   min-width: 0;
+  flex: 1;
 }
 
 .item-head {
@@ -508,6 +540,26 @@ button:disabled {
   background: var(--card);
   border: 1px solid var(--border);
   color: var(--sub);
+}
+
+/* On a phone the picture, the name and the button can't all share one row —
+   the name ends up wrapping a word at a time. The button drops to its own
+   line instead, which leaves the picture and the name the full width and
+   gives the button a comfortable tap target. */
+@media (max-width: 480px) {
+  .item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    padding: 14px;
+    column-gap: 12px;
+    row-gap: 12px;
+  }
+
+  .item > button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import CategoryGroup from "./CategoryGroup";
 import ItemFilters from "./ItemFilters";
+import ItemThumb from "./ItemThumb";
 import {
   categoryOf,
   formatPrice,
@@ -154,6 +155,7 @@ export default function ReserveList({
     const price = formatPrice(item);
     return (
       <li key={item.id} className="item">
+        <ItemThumb item={item} />
         <div className="item-main">
           <span className="item-head">
             <span className="item-name">{item.item}</span>
