@@ -47,7 +47,7 @@ weddings, ...) rather than generalizing up front.
   above the list: what they've taken, what each one costs, and the total. Each
   line has an **Annuler** button that hands the item straight back to the list.
   A guest can only release what's reserved in their own name.
-  The recap prices each item from the same `Price` column the cards and the
+  The recap prices each item from the same price column the cards and the
   filters read, so the three always agree. Items with no price still appear in
   the recap; they're left out of the total, and the recap says how many.
 
