@@ -8,23 +8,34 @@ import { useEffect, useRef, useState } from "react";
 // what the item's link previews as, and until that comes back (or if nothing
 // does) the card shows a placeholder rather than a hole.
 //
-// Previews resolved this visit, so collapsing a section and reopening it, or
-// filtering the list back and forth, doesn't ask twice.
+// Previews resolved this visit, keyed the way the route keys them: by the link,
+// never by the row the item sits on. A row number is a position, and a sheet
+// that gets a line inserted hands every id below it to a different item — so a
+// picture filed under one would resurface next to something unrelated.
 const resolved = new Map();
 
 export default function ItemThumb({ item }) {
-  const [preview, setPreview] = useState("");
-  const [failed, setFailed] = useState(false);
+  // The image and the key it was fetched for travel together, so a picture can
+  // never outlive the item it belongs to: if this card is reused for another
+  // row — an id the sheet has since moved, an item put back by the recap — the
+  // keys stop matching and the stale picture stops rendering, without waiting
+  // for the replacement to arrive.
+  const [preview, setPreview] = useState(null);
+  // Which src failed, rather than whether one did. A card that gets a new
+  // picture deserves a fresh try at showing it.
+  const [failedSrc, setFailedSrc] = useState("");
   const ref = useRef(null);
 
-  const src = item.image || preview;
+  const linkKey = item.previewKey || "";
+  const fallback = preview && preview.key === linkKey ? preview.image : "";
+  const src = item.image || fallback;
 
   useEffect(() => {
-    if (item.image || !item.link) return;
+    if (item.image || !linkKey) return;
 
-    const cached = resolved.get(item.id);
+    const cached = resolved.get(linkKey);
     if (cached !== undefined) {
-      setPreview(cached);
+      setPreview({ key: linkKey, image: cached });
       return;
     }
 
@@ -32,11 +43,11 @@ export default function ItemThumb({ item }) {
 
     async function load() {
       try {
-        const res = await fetch(`/api/preview?id=${item.id}`);
+        const res = await fetch(`/api/preview?key=${linkKey}`);
         const data = await res.json();
         const image = (data.ok && data.image) || "";
-        resolved.set(item.id, image);
-        if (!cancelled) setPreview(image);
+        resolved.set(linkKey, image);
+        if (!cancelled) setPreview({ key: linkKey, image });
       } catch {
         // Leave it unresolved rather than remembered, so a flaky moment
         // doesn't cost the card its picture for the rest of the visit.
@@ -68,10 +79,10 @@ export default function ItemThumb({ item }) {
       cancelled = true;
       observer.disconnect();
     };
-  }, [item.id, item.image, item.link]);
+  }, [linkKey, item.image]);
 
   const body =
-    src && !failed ? (
+    src && src !== failedSrc ? (
       <img
         src={src}
         // Decorative: the item's name is right beside it, and a screen reader
@@ -84,7 +95,7 @@ export default function ItemThumb({ item }) {
         referrerPolicy="no-referrer"
         // A hotlink-blocked or dead image would otherwise leave a broken-icon
         // box on the card.
-        onError={() => setFailed(true)}
+        onError={() => setFailedSrc(src)}
       />
     ) : (
       <span className="thumb-fallback" aria-hidden="true">
