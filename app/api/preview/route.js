@@ -6,10 +6,16 @@ import { extractPreviewImage } from "../../../lib/preview";
 // empty: whatever picture the shop's own page advertises to link previews
 // (og:image and friends).
 //
-// The route takes a row id, never a URL. That's the guard: the only pages this
+// The route takes a key, never a URL. That's the guard: the only pages this
 // server will ever fetch are the ones the list owner put in the sheet, so a
-// public endpoint can't be pointed at an internal address. The row is resolved
+// public endpoint can't be pointed at an internal address. The key is resolved
 // through a short-lived copy of the list rather than a read per card.
+//
+// The key comes from the item's link (see lib/preview), not from its row. A row
+// number is where an item happens to sit today: insert a line in the sheet and
+// every row under it moves, while the answers this route already handed out —
+// held for a day in the guest's browser — stay behind on the old numbers, which
+// is how a card ends up wearing its neighbour's picture.
 
 // Fetches are capped in three directions — how long we wait, how much we read,
 // and what we accept — because the pages on the other end are big commercial
@@ -27,18 +33,32 @@ const ITEMS_TTL_MS = 60 * 1000;
 // Per serverless instance, like the resolved tab title in lib/sheets — warm
 // instances answer instantly, cold ones pay for one page fetch.
 const previews = new Map();
-let itemsCache = { at: 0, byId: new Map() };
+let itemsCache = { at: 0, byKey: new Map() };
+// A list scrolling into view asks for every card at once, so an expired cache
+// would otherwise mean one sheet read per card. The first caller reads and the
+// rest wait on that same read.
+let refreshing = null;
 
-async function linkFor(id) {
-  const now = Date.now();
-  if (now - itemsCache.at > ITEMS_TTL_MS) {
-    const { items } = await getRegistry();
-    itemsCache = {
-      at: now,
-      byId: new Map(items.map((i) => [i.id, i])),
-    };
+async function linkFor(key) {
+  if (Date.now() - itemsCache.at > ITEMS_TTL_MS) {
+    refreshing ??= (async () => {
+      try {
+        const { items } = await getRegistry();
+        itemsCache = {
+          at: Date.now(),
+          byKey: new Map(
+            items.filter((i) => i.previewKey).map((i) => [i.previewKey, i.link])
+          ),
+        };
+      } finally {
+        // Cleared either way: a failed read shouldn't wedge every later
+        // request on the same rejected promise.
+        refreshing = null;
+      }
+    })();
+    await refreshing;
   }
-  return itemsCache.byId.get(id)?.link || "";
+  return itemsCache.byKey.get(key) || "";
 }
 
 // Reads the head of the response and stops there. Product pages routinely run
@@ -106,14 +126,16 @@ async function previewImage(link) {
 }
 
 export async function GET(request) {
-  const id = Number(new URL(request.url).searchParams.get("id"));
-  if (!Number.isInteger(id) || id < 2) {
-    return NextResponse.json({ ok: false, reason: "invalid_id" }, { status: 400 });
+  const key = new URL(request.url).searchParams.get("key") || "";
+  // Shaped like the keys lib/preview produces. A well-formed key that names no
+  // row is not an error, just a card with nothing to show — see below.
+  if (!/^[0-9a-f]{16}$/.test(key)) {
+    return NextResponse.json({ ok: false, reason: "invalid_key" }, { status: 400 });
   }
 
   let link;
   try {
-    link = await linkFor(id);
+    link = await linkFor(key);
   } catch (err) {
     // Same reasoning as the page and the recap: log the detail, tell the guest
     // nothing that describes the sheet.
