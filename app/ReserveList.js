@@ -16,8 +16,14 @@ const NAME_REQUIRED = "Indiquez votre nom pour qu'on sache qui apporte quoi.";
 
 const NO_CATEGORY_FILTER = new Set();
 
-export default function ReserveList({ items, guestName, resolveName }) {
-  const [claimed, setClaimed] = useState({}); // id -> true once handled this session
+export default function ReserveList({
+  items,
+  hidden,
+  restored,
+  guestName,
+  resolveName,
+  onClaimed,
+}) {
   const [busyId, setBusyId] = useState(null);
   const [error, setError] = useState("");
 
@@ -50,10 +56,10 @@ export default function ReserveList({ items, guestName, resolveName }) {
       });
       const data = await res.json();
       if (data.ok) {
-        setClaimed((c) => ({ ...c, [id]: true }));
+        onClaimed(id, true);
       } else if (data.reason === "already_reserved") {
         setError(`Quelqu'un a été plus rapide — déjà réservé par ${data.reservedBy}.`);
-        setClaimed((c) => ({ ...c, [id]: true }));
+        onClaimed(id, false);
       } else {
         setError("Une erreur est survenue — merci de réessayer.");
       }
@@ -88,7 +94,15 @@ export default function ReserveList({ items, guestName, resolveName }) {
     setSelected(new Set());
   }
 
-  const unclaimed = items.filter((i) => !claimed[i.id]);
+  // What is still up for grabs. Items released this visit rejoin the ones the
+  // page was rendered with — the id is the sheet's row number, so sorting by it
+  // puts everything back in the sheet's order however it got here.
+  const byId = new Map();
+  for (const item of items) if (!hidden[item.id]) byId.set(item.id, item);
+  for (const item of Object.values(restored)) {
+    if (!hidden[item.id]) byId.set(item.id, item);
+  }
+  const unclaimed = [...byId.values()].sort((a, b) => a.id - b.id);
 
   // A field holding no digits at all just doesn't constrain the list, which is
   // gentler than an error under something still being typed. Digits anywhere
