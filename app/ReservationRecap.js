@@ -96,7 +96,23 @@ export default function ReservationRecap({ name, version, onReleased }) {
       <ul className="recap-items">
         {items.map((item) => (
           <li key={item.id} className="recap-item">
-            <span className="recap-item-name">{item.item}</span>
+            <span className="recap-item-main">
+              <span className="recap-item-name">{item.item}</span>
+              {/* The claimed item has left the list, and with it the only
+                  place the link was shown — so the recap carries it. It's
+                  what a guest needs *after* reserving: the shop page to
+                  actually go and buy from. */}
+              {item.link && (
+                <a
+                  href={item.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="item-link recap-item-link"
+                >
+                  Voir l'article ↗
+                </a>
+              )}
+            </span>
             {/* The card's own price, formatting and all, so the recap never
                 disagrees with the list it was claimed from. */}
             <span className="recap-item-price">
