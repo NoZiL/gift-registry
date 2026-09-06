@@ -17,11 +17,16 @@ weddings, ...) rather than generalizing up front.
 - The gift list lives entirely in a Google Sheet you control. Add/remove/edit
   items there — the app always reads it live, nothing is duplicated.
 - The sheet stays yours to format. Columns are matched by their headings
-  rather than their position, section headings and the intro above the table
-  carry over to the page, and a `Lien` cell reading "ICI" is followed to the
-  URL behind it. See step 1 for the details.
-- The public page (`/`) shows only items not yet claimed, grouped the way the
-  sheet groups them, with the shop and price alongside each one.
+  rather than their position, the title and intro above the table carry over
+  to the page, and a `Lien` cell reading "ICI" is followed to the URL behind
+  it. See step 1 for the details.
+- The public page (`/`) shows only items not yet claimed.
+- Each item can carry a **category**, a **price** and a **shop**. All are
+  optional, and the first two drive the browsing UI: items are grouped into
+  collapsible sections by category, and guests can narrow the list by category
+  and by a min/max price range. A category can come from a `Catégorie` column
+  or from a section heading the sheet already has. See
+  [Categories and prices](#categories-and-prices).
 - `/admin` (password protected) generates a personal link + QR code per
   guest — e.g. `https://your-app.vercel.app/?g=Grandma%20Linda`. Opening that
   link pre-fills their name, so claiming is a single tap.
@@ -64,6 +69,7 @@ from the headings.
    | `Où?` / `Store` | where to get it | no |
    | `Lien` / `Link` | the product page | no |
    | `Prix` / `Price` | the price | no |
+   | `Catégorie` / `Category` | which section it belongs in | no |
    | `Réservé par` / `ReservedBy` | who's bringing it | yes |
    | `Réservé le` / `ReservedAt` | when they claimed it | no |
    | `Notes` | anything else worth saying | no |
@@ -83,10 +89,13 @@ from the headings.
    - **Links** can be a bare URL, or a short word like `ICI` with the link
      attached to it (Insert → Link) — the app follows the link, not the
      text. The second keeps the spreadsheet readable.
-   - **Sections.** A heading like `Textiles` or `Jeux et éveil` on its own
-     row, merged across the table's columns, groups the items under it on
-     the page. The merge is what marks it as a heading rather than a gift
-     nobody filled a price in for.
+   - **Sections.** There are two ways to group items, and they end up in the
+     same place. Either fill in a `Catégorie` column per row, or put a
+     heading like `Textiles` or `Jeux et éveil` on its own row, merged across
+     the table's columns — every row under it belongs to that section until
+     the next heading. The merge is what marks a row as a heading rather
+     than a gift nobody filled a price in for. A `Catégorie` cell wins over
+     the heading a row sits under.
    - **A title and an intro** above the header row are used as the page's
      own title and intro paragraphs, so you can reword them without a
      deploy.
@@ -153,6 +162,44 @@ Visit `http://localhost:3000` for the guest list, and
 Go to `/admin`, enter the password, type a guest's name, and you'll get a
 shareable link plus a QR code image (long-press or right-click to save it).
 Send the link by text/email, or print the QR code for a shower.
+
+## Categories and prices
+
+Both are free text, and both are optional — fill in as much or as little as
+you like. Neither has to sit in a particular column; the app finds them by
+their heading (step 1).
+
+**Category** is whatever wording you want: `Chambre`, `Repas`, `Vêtements`.
+It can come from a `Catégorie` / `Category` column, or from a merged section
+heading above a run of rows — whichever suits the sheet. Every distinct value
+becomes its own collapsible section on the public page, and guests get a row
+of category chips to filter with. Sections appear in the order their category
+first shows up in the sheet, so you set the running order by arranging rows.
+Items with no category collect in a "Sans catégorie" section at the bottom. If
+nothing has a category at all, the page stays a plain flat list.
+
+**Price** is used two ways: to show a price on the item, and to power the
+min/max filter. It's read leniently, so you don't have to think about
+formatting:
+
+- Either decimal separator works — `25,50` and `25.50` both mean 25.50.
+- Currency symbols and thousands separators are fine — `39,90 €`, `$1,299.00`,
+  `1 299,00 EUR` all parse.
+- The cell is displayed **exactly as the sheet shows it**, so a cell you
+  formatted as `$45.00` stays `$45.00` — the app won't convert or re-format
+  your currency. A bare number like `25` has no currency of its own, so it's
+  shown as `25 €`.
+- Anything with no number in it (`offert`, `à voir`) is shown on the item just
+  as you wrote it, but counts as "no price" for the filter — see below.
+
+Two things worth knowing about how the filters behave:
+
+- Selecting several category chips widens the list (`Repas` **or**
+  `Vêtements`), it doesn't narrow it. No chips selected means no category
+  filter.
+- Setting a min or max hides items that have no price, since there's no honest
+  way to place them in a range. The app says how many are hidden right under
+  the filters, so nobody wonders where something went.
 
 ## Notes & limits
 
