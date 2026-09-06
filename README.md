@@ -27,6 +27,12 @@ weddings, ...) rather than generalizing up front.
   and by a min/max price range. A category can come from a `Catégorie` column
   or from a section heading the sheet already has. See
   [Categories and prices](#categories-and-prices).
+- Every item shows a small **picture**, so the list can be skimmed instead of
+  read. Give the sheet an `Image` column and whatever address it holds is what
+  the card shows; leave the cell empty, or the column out entirely, and the app
+  pulls the preview image off the item's own `Lien`, the way a chat app
+  previews a pasted URL. Items with neither keep a discreet 🎁 placeholder. See
+  [Photos and link previews](#photos-and-link-previews).
 - `/admin` (password protected) generates a personal link + QR code per
   guest — e.g. `https://your-app.vercel.app/?g=Grandma%20Linda`. Opening that
   link pre-fills their name, so claiming is a single tap.
@@ -79,6 +85,7 @@ from the headings.
    | `Catégorie` / `Category` | which section it belongs in | no |
    | `Réservé par` / `ReservedBy` | who's bringing it | yes |
    | `Réservé le` / `ReservedAt` | when they claimed it | no |
+   | `Image` / `Photo` | a picture of the gift | no |
    | `Notes` | anything else worth saying | no |
 
    Only two are required: the item column, and `Réservé par` — that's where
@@ -103,6 +110,11 @@ from the headings.
      the next heading. The merge is what marks a row as a heading rather
      than a gift nobody filled a price in for. A `Catégorie` cell wins over
      the heading a row sits under.
+   - **Pictures.** An `Image` column lets you choose the thumbnail on each
+     card, as a bare address or behind a word, exactly like `Lien`. Skip the
+     column entirely and the cards still get pictures — the app falls back to
+     the preview image the linked shop publishes. See
+     [Photos and link previews](#photos-and-link-previews).
    - **A title and an intro** above the header row are used as the page's
      own title and intro paragraphs, so you can reword them without a
      deploy.
@@ -207,6 +219,41 @@ Two things worth knowing about how the filters behave:
 - Setting a min or max hides items that have no price, since there's no honest
   way to place them in a range. The app says how many are hidden right under
   the filters, so nobody wonders where something went.
+
+## Photos and link previews
+
+Every card carries a thumbnail, and the app looks for one in two places, in
+this order.
+
+**1. An `Image` column, if your sheet has one.** Put the address of a picture
+in the cell — right click an image in your browser and "Copy image address" —
+and that's what the card shows. Like `Lien`, it can be a bare address or a
+short word with the link attached to it, whichever keeps your sheet readable.
+
+This always wins: it's your choice, it costs no extra request, and it's the way
+to fix an item whose shop advertises a bad picture (a logo, a banner, the wrong
+colourway).
+
+A Google Drive share link works too. Drive hands you a link to its *viewer*
+page rather than to the file, so the app rewrites it to Drive's thumbnail
+address for you — just make sure the file itself is shared with "anyone with
+the link", or nobody but you will see it.
+
+**2. The item's `Lien`.** With no `Image` column, or an empty cell in it, the
+app fetches the shop's page and reads the preview picture it publishes for
+exactly this purpose (its `og:image`) — the same picture you get when you paste
+that link into a chat app. This happens per card as it scrolls into view, and
+the answer is cached, so a page of thirty items doesn't turn into thirty
+requests on every visit.
+
+Only links already in your sheet are ever fetched: the page asks for a preview
+by row number, not by URL, so the endpoint can't be aimed at anything you
+didn't put there yourself.
+
+Not every shop plays along — some publish no preview image, some block
+non-browser visitors, some serve pictures that refuse to be shown on another
+site. Any of those leaves the card with its 🎁 placeholder, which is the cue
+to fill in an `Image` cell by hand for that row.
 
 ## Notes & limits
 

@@ -109,6 +109,10 @@ undo. Everything else is optional and additive:
   is how the sheet this was built against already groups its rows.
 - `Réservé le` / `ReservedAt` timestamps each claim; without it, claims simply
   aren't timestamped.
+- `Image` / `Photo` sets each card's thumbnail, read the same way `Lien` is —
+  a bare address or a link behind a word. Without the column, the cards still
+  get pictures: the app falls back to the preview image the linked shop
+  publishes.
 - `Réservé` / `Reserved` is a leftover from the original fixed layout. A sheet
   that has it keeps working — it's written and cleared alongside the name —
   but nothing needs it: a name in `Réservé par` is what marks a row taken.
