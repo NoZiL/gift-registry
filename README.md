@@ -16,11 +16,17 @@ weddings, ...) rather than generalizing up front.
 
 - The gift list lives entirely in a Google Sheet you control. Add/remove/edit
   items there — the app always reads it live, nothing is duplicated.
+- The sheet stays yours to format. Columns are matched by their headings
+  rather than their position, the title and intro above the table carry over
+  to the page, and a `Lien` cell reading "ICI" is followed to the URL behind
+  it. See step 1 for the details.
 - The public page (`/`) shows only items not yet claimed.
-- Each item can carry a **Category** and a **Price**. Both are optional, and
-  both drive the browsing UI: items are grouped into collapsible sections by
-  category, and guests can narrow the list by category and by a min/max price
-  range. See [Categories and prices](#categories-and-prices).
+- Each item can carry a **category**, a **price** and a **shop**. All are
+  optional, and the first two drive the browsing UI: items are grouped into
+  collapsible sections by category, and guests can narrow the list by category
+  and by a min/max price range. A category can come from a `Catégorie` column
+  or from a section heading the sheet already has. See
+  [Categories and prices](#categories-and-prices).
 - `/admin` (password protected) generates a personal link + QR code per
   guest — e.g. `https://your-app.vercel.app/?g=Grandma%20Linda`. Opening that
   link pre-fills their name, so claiming is a single tap.
@@ -41,32 +47,67 @@ weddings, ...) rather than generalizing up front.
   above the list: what they've taken, what each one costs, and the total. Each
   line has an **Annuler** button that hands the item straight back to the list.
   A guest can only release what's reserved in their own name.
-  The recap prices each item from the same `Price` column the cards and the
+  The recap prices each item from the same price column the cards and the
   filters read, so the three always agree. Items with no price still appear in
   the recap; they're left out of the total, and the recap says how many.
 
 ## 1. Set up the Google Sheet
 
-1. Create a new Google Sheet (or use your existing one — just add a tab for
-   this).
-2. Name a tab (default expected name: `Items`) and add this header row,
-   exactly in this column order:
+The app reads the sheet you already keep, rather than asking you to keep a
+second one in its shape. Point it at your tab and it works out the layout
+from the headings.
 
-   | A | B | C | D | E | F | G | H |
-   |---|---|---|---|---|---|---|---|
-   | Item | Link | Notes | Reserved | ReservedBy | ReservedAt | Category | Price |
+1. Create a Google Sheet, or use the tab of your own planning workbook that
+   already holds the list.
 
-3. Starting on row 2, add one row per gift idea. Only **Item** is required —
-   `Link` (e.g. an Amazon URL), `Notes`, `Category` and `Price` are all
-   optional. Leave `Reserved`, `ReservedBy`, and `ReservedAt` blank; the app
-   fills those in.
+   It has to be a **Google Sheet**, not an Excel file sitting in Drive. An
+   uploaded `.xlsx` looks the same in the browser but the Sheets API can't
+   open it: open it and use **File → Save as Google Sheets**, then use the
+   ID of the copy that creates.
 
-   > **Already running an older sheet?** `Category` and `Price` were added
-   > after the fact, which is exactly why they sit at the end instead of next
-   > to `Item`. An existing sheet keeps working untouched — both columns just
-   > read as empty. Add the two headers in G and H whenever you want the
-   > filters and the grouped sections.
-4. Copy the Sheet ID out of the URL:
+2. Somewhere in the tab, have a row that names the columns. It doesn't have
+   to be row 1 — a title and an intro above it are fine, and are used (see
+   below). These headings are understood, in any order, in French or
+   English:
+
+   | Heading | Holds | Required |
+   |---|---|---|
+   | `Quoi?` / `Item` | what the gift is | yes |
+   | `Où?` / `Store` | where to get it | no |
+   | `Lien` / `Link` | the product page | no |
+   | `Prix` / `Price` | the price | no |
+   | `Catégorie` / `Category` | which section it belongs in | no |
+   | `Réservé par` / `ReservedBy` | who's bringing it | yes |
+   | `Réservé le` / `ReservedAt` | when they claimed it | no |
+   | `Notes` | anything else worth saying | no |
+
+   Only two are required: the item column, and `Réservé par` — that's where
+   a guest's name gets written. Accents, casing and a trailing space don't
+   matter, and columns the app doesn't recognize are left alone.
+
+3. Add one row per gift under that. Only the item column has to be filled
+   in. Leave `Réservé par` empty — an item counts as taken as soon as there
+   is a name in it, whether the app put it there or you did.
+
+4. Optional, and worth doing:
+
+   - **Prices** typed as plain numbers are shown as euros. A price you write
+     out yourself (`12 €`, `à partir de 20`) is shown exactly as written.
+   - **Links** can be a bare URL, or a short word like `ICI` with the link
+     attached to it (Insert → Link) — the app follows the link, not the
+     text. The second keeps the spreadsheet readable.
+   - **Sections.** There are two ways to group items, and they end up in the
+     same place. Either fill in a `Catégorie` column per row, or put a
+     heading like `Textiles` or `Jeux et éveil` on its own row, merged across
+     the table's columns — every row under it belongs to that section until
+     the next heading. The merge is what marks a row as a heading rather
+     than a gift nobody filled a price in for. A `Catégorie` cell wins over
+     the heading a row sits under.
+   - **A title and an intro** above the header row are used as the page's
+     own title and intro paragraphs, so you can reword them without a
+     deploy.
+
+5. Copy the Sheet ID out of the URL:
    `https://docs.google.com/spreadsheets/d/`**`THIS_PART`**`/edit`
 
 ## 2. Create a Google service account (lets the app read/write the sheet)
@@ -93,7 +134,9 @@ Copy `.env.example` to `.env.local` for local testing, and fill in:
 - `GOOGLE_PRIVATE_KEY` — the `private_key` from the JSON key (keep the
   quotes and `\n` sequences as-is)
 - `GOOGLE_SHEET_ID` — the ID from the sheet's URL
-- `GOOGLE_SHEET_TAB` — the tab name (default `Items`)
+- `GOOGLE_SHEET_TAB` — the name of the tab holding the gift list. Optional
+  only when the spreadsheet has a single tab; required as soon as it has
+  more, so a planning workbook can't publish its budget tab by accident
 - `ADMIN_PASSWORD` — whatever password you and your partner want to use to
   open `/admin`
 - `NEXT_PUBLIC_BASE_URL` — fill this in once you know your deployed URL
@@ -129,20 +172,22 @@ Send the link by text/email, or print the QR code for a shower.
 
 ## Categories and prices
 
-Both columns are free text, and both are optional — fill in as much or as
-little as you like.
+Both are free text, and both are optional — fill in as much or as little as
+you like. Neither has to sit in a particular column; the app finds them by
+their heading (step 1).
 
-**Category (column G)** is whatever wording you want: `Chambre`, `Repas`,
-`Vêtements`. Every distinct value becomes its own collapsible section on the
-public page, and guests get a row of category chips to filter with. Sections
-appear in the order their category first shows up in the sheet, so you set the
-running order by arranging rows. Items with an empty `Category` collect in a
-"Sans catégorie" section at the bottom. If no row has a category at all, the
-page stays the plain flat list it was before.
+**Category** is whatever wording you want: `Chambre`, `Repas`, `Vêtements`.
+It can come from a `Catégorie` / `Category` column, or from a merged section
+heading above a run of rows — whichever suits the sheet. Every distinct value
+becomes its own collapsible section on the public page, and guests get a row
+of category chips to filter with. Sections appear in the order their category
+first shows up in the sheet, so you set the running order by arranging rows.
+Items with no category collect in a "Sans catégorie" section at the bottom. If
+nothing has a category at all, the page stays a plain flat list.
 
-**Price (column H)** is used two ways: to show a price on the item, and to
-power the min/max filter. It's read leniently, so you don't have to think
-about formatting:
+**Price** is used two ways: to show a price on the item, and to power the
+min/max filter. It's read leniently, so you don't have to think about
+formatting:
 
 - Either decimal separator works — `25,50` and `25.50` both mean 25.50.
 - Currency symbols and thousands separators are fine — `39,90 €`, `$1,299.00`,

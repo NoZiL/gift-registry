@@ -159,6 +159,7 @@ export default function ReserveList({
             <span className="item-name">{item.item}</span>
             {price && <span className="item-price">{price}</span>}
           </span>
+          {item.store && <span className="item-store">{item.store}</span>}
           {item.notes && <span className="item-notes">{item.notes}</span>}
           {item.link && (
             <a

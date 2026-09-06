@@ -36,6 +36,9 @@ h1 {
   color: var(--ink);
   margin: 0 0 16px;
   line-height: 1.55;
+  /* The intro comes from a spreadsheet cell, where the line breaks were typed
+     on purpose. */
+  white-space: pre-line;
 }
 
 .sub {
@@ -283,9 +286,16 @@ input:focus {
   white-space: nowrap;
 }
 
+/* Where the item can be bought -- the sheet's "Où?" column. */
+.item-store {
+  color: var(--sub);
+  font-size: 0.88rem;
+}
+
 .item-notes {
   color: var(--sub);
   font-size: 0.88rem;
+  white-space: pre-line;
 }
 
 .item-link {
