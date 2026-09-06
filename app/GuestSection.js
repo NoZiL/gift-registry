@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import GuestName from "./GuestName";
+import HowTo from "./HowTo";
 import ReservationRecap from "./ReservationRecap";
 import ReserveList from "./ReserveList";
 import {
@@ -95,6 +96,9 @@ export default function GuestSection({ items, urlName }) {
           ? `Bonjour ${name} — touchez « Je m'en occupe » sur ce que vous aimeriez apporter.`
           : "Touchez « Je m'en occupe » sur ce que vous aimeriez apporter."}
       </p>
+
+      {/* Above the name box, because the first step is filling that box in. */}
+      <HowTo />
 
       <GuestName
         name={name}

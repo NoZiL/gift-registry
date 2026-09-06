@@ -33,6 +33,15 @@ weddings, ...) rather than generalizing up front.
   pulls the preview image off the item's own `Lien`, the way a chat app
   previews a pasted URL. Items with neither keep a discreet 🎁 placeholder. See
   [Photos and link previews](#photos-and-link-previews).
+- A **Comment ça marche ?** guide sits at the top of the page, above the name
+  box: seven numbered steps that name the buttons literally ("Je m'en occupe",
+  "Annuler") and say what happens after each tap, plus a short "Bon à savoir"
+  section (no account, no card details, how to find your reservations again
+  from another device). It's open on arrival, since a guest who needs it
+  shouldn't have to find it first, and closing it is remembered in
+  `localStorage` so a returning guest isn't made to scroll past it again. The
+  wording lives in `app/HowTo.js`, not in the sheet — it describes the app's
+  own buttons, which the sheet has no say over.
 - `/admin` (password protected) generates a personal link + QR code per
   guest — e.g. `https://your-app.vercel.app/?g=Grandma%20Linda`. Opening that
   link pre-fills their name, so claiming is a single tap.
@@ -56,6 +65,10 @@ weddings, ...) rather than generalizing up front.
   The recap prices each item from the same price column the cards and the
   filters read, so the three always agree. Items with no price still appear in
   the recap; they're left out of the total, and the recap says how many.
+  Each line also repeats the item's **Voir l'article** link: claiming an item
+  takes it out of the list, and the list was the only place the link was
+  shown — but the link is exactly what a guest needs *after* reserving, to go
+  and buy the thing. Lines whose sheet row has no `Lien` simply don't show one.
 
 ## 1. Set up the Google Sheet
 
