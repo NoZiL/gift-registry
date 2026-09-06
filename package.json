@@ -11,11 +11,12 @@
     "uuid": "^11.1.1"
   },
   "dependencies": {
-    "next": "16.3.2",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "@vercel/analytics": "^2.0.1",
     "google-auth-library": "^9.15.0",
     "googleapis": "^176.0.0",
-    "qrcode": "1.5.4"
+    "next": "16.3.2",
+    "qrcode": "1.5.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   }
 }

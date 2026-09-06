@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getItems } from "../../../lib/sheets";
+import { getRegistry } from "../../../lib/sheets";
 import { extractPreviewImage } from "../../../lib/preview";
 
 // The thumbnail an item card falls back to when the sheet's Image column is
@@ -32,7 +32,7 @@ let itemsCache = { at: 0, byId: new Map() };
 async function linkFor(id) {
   const now = Date.now();
   if (now - itemsCache.at > ITEMS_TTL_MS) {
-    const items = await getItems();
+    const { items } = await getRegistry();
     itemsCache = {
       at: now,
       byId: new Map(items.map((i) => [i.id, i])),

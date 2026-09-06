@@ -82,44 +82,59 @@ doesn't get committed if you initialize a repo later).
 
 ## 3. Create and share the Google Sheet
 
-> **Status: done.** The sheet `Baby Registry — Items` exists in the owner's
-> Drive, populated with the 35 items imported from the `Liste de naissance`
-> tab of the couple's own planning workbook (name, product link, and a
-> `Category · Brand · Price` note per item). Reservation columns are empty.
-> Two things remain: renaming the tab to `Items`, and sharing it with the
-> service account. Keep the spreadsheet ID out of this repo — it goes in the
-> Vercel env vars only.
+> **Status:** the list lives in the `Liste de naissance` tab of the couple's
+> own planning workbook, formatted by hand — sections (`Textiles`, `Jeux et
+> éveil`, `Autres`), a `Quoi? / Où? / Lien / Prix / Réservé par` header row
+> under a title and an intro, and product links behind cells reading "ICI".
+> The app reads that tab as it stands; there is no separate `Items` sheet to
+> maintain and nothing to re-import. What remains: converting the workbook
+> from `.xlsx` to a real Google Sheet, sharing it with the service account,
+> and setting `GOOGLE_SHEET_TAB`. Keep the spreadsheet ID out of this repo —
+> it goes in the Vercel env vars only.
 
 Service accounts don't have their own Drive storage, so the sheet must be
 owned by a real Google account, not created by the service account.
 
-The layout the app expects — row 1 is the header, data starts at row 2:
+The app matches columns by their headings rather than their position, so the
+tab keeps whatever layout its owner gave it. `README.md` step 1 documents the
+headings it understands and how sections, prices and links are read.
 
-```
-Item	Link	Notes	Reserved	ReservedBy	ReservedAt	Category	Price	Image
-```
+Two columns are required: the item column (`Quoi?` / `Item`) and `Réservé par`
+/ `ReservedBy`, where a guest's name is written and cleared again when they
+undo. Everything else is optional and additive:
 
-`Category`, `Price` and `Image` are optional, and an existing sheet without
-them keeps working. Filling in `Category` and `Price` is what turns on the
-filters, the grouped sections, and the total in each guest's reservation
-recap. `Image` takes the address of a photo for the item's thumbnail; left
-empty, the app falls back to the preview image published by whatever is in
-`Link`, so the cards have pictures either way.
-
-Only `Item` is required. The app writes `Reserved`, `ReservedBy` and
-`ReservedAt` itself when a guest claims something; leave them empty.
+- `Prix` / `Price` and `Catégorie` / `Category` turn on the filters, the
+  grouped sections, and the total in each guest's reservation recap. A
+  category can also come from a section heading merged across the table, which
+  is how the sheet this was built against already groups its rows.
+- `Réservé le` / `ReservedAt` timestamps each claim; without it, claims simply
+  aren't timestamped.
+- `Image` / `Photo` sets each card's thumbnail, read the same way `Lien` is —
+  a bare address or a link behind a word. Without the column, the cards still
+  get pictures: the app falls back to the preview image the linked shop
+  publishes.
+- `Réservé` / `Reserved` is a leftover from the original fixed layout. A sheet
+  that has it keeps working — it's written and cleared alongside the name —
+  but nothing needs it: a name in `Réservé par` is what marks a row taken.
 
 Remaining steps:
 
-1. Nothing to do about the tab name. `GOOGLE_SHEET_TAB` is optional and the
-   app uses the first tab when it's unset, which is right for a single-tab
-   sheet. Set it only to pick one tab out of several — and note that a CSV
-   import names the tab after the file, so it is rarely what you'd guess.
-2. Share the spreadsheet with the service account's `client_email` as
+1. **The workbook must be a Google Sheet, not an uploaded `.xlsx`.** A Drive
+   URL carrying `rtpof=true` is the giveaway: the file opens in the browser,
+   but the Sheets API returns "This operation is not supported for this
+   document" for it. Open it and use **File → Save as Google Sheets**, then
+   take `GOOGLE_SHEET_ID` from the copy that creates. Note that the copy is
+   a snapshot — from then on, that copy is the live list.
+2. **Set `GOOGLE_SHEET_TAB` to the gift-list tab** (here: `Liste de
+   naissance`). The workbook has several tabs and the first one is the
+   family's private purchase tracker; the app refuses to start rather than
+   pick one for you, so this is not optional. Note that a CSV import names
+   the tab after the file, so a tab name is rarely what you'd guess.
+3. Share the spreadsheet with the service account's `client_email` as
    **Editor**. Read-only is not enough; the app writes reservations back.
    Missing this share is the single most common cause of the homepage
    showing "couldn't load the list".
-3. Grab the spreadsheet ID from the URL for `GOOGLE_SHEET_ID`:
+4. Grab the spreadsheet ID from the URL for `GOOGLE_SHEET_ID`:
    `https://docs.google.com/spreadsheets/d/`**`THIS_PART`**`/edit`
 
 ## 4. Populate environment variables
@@ -131,7 +146,7 @@ cat > .env.local <<EOF
 GOOGLE_SERVICE_ACCOUNT_EMAIL=$SA_EMAIL
 GOOGLE_PRIVATE_KEY="$(node -e "console.log(JSON.parse(require('fs').readFileSync('./service-account-key.json')).private_key)")"
 GOOGLE_SHEET_ID=<paste from step 3>
-GOOGLE_SHEET_TAB=Items
+GOOGLE_SHEET_TAB=<the gift-list tab, e.g. Liste de naissance>
 ADMIN_PASSWORD=<the password from step 0>
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
 EOF
@@ -173,7 +188,7 @@ path — no CLI, no login token, and every later push auto-deploys.
    | `GOOGLE_SERVICE_ACCOUNT_EMAIL` | `client_email` from the JSON key |
    | `GOOGLE_PRIVATE_KEY` | `private_key` from the JSON key — paste the whole thing including the `-----BEGIN/END-----` lines |
    | `GOOGLE_SHEET_ID` | the ID from the Sheet URL |
-   | `GOOGLE_SHEET_TAB` | optional — omit it to use the first tab |
+   | `GOOGLE_SHEET_TAB` | the gift-list tab; omit only for a single-tab spreadsheet |
    | `ADMIN_PASSWORD` | your chosen `/admin` password |
    | `NEXT_PUBLIC_BASE_URL` | optional — leave it unset, see step 7 |
 
