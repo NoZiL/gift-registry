@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { formatPrice } from "../lib/price";
+import { formatAmount, formatPrice } from "../lib/registry";
 
 // What the guest has already claimed, and what it adds up to. The server can't
 // render this with the page — most of the time the name lives in localStorage,
@@ -72,7 +72,7 @@ export default function ReservationRecap({ name, version, onReleased }) {
 
   if (!name || items.length === 0) return null;
 
-  const priced = items.filter((i) => typeof i.price === "number");
+  const priced = items.filter((i) => i.price != null);
   const total = priced.reduce((sum, i) => sum + i.price, 0);
   const unpriced = items.length - priced.length;
 
@@ -88,7 +88,7 @@ export default function ReservationRecap({ name, version, onReleased }) {
         {priced.length > 0 && (
           <p className="recap-total">
             <span className="recap-total-label">Total</span>
-            <span className="recap-total-value">{formatPrice(total)}</span>
+            <span className="recap-total-value">{formatAmount(total)}</span>
           </p>
         )}
       </div>
@@ -97,8 +97,10 @@ export default function ReservationRecap({ name, version, onReleased }) {
         {items.map((item) => (
           <li key={item.id} className="recap-item">
             <span className="recap-item-name">{item.item}</span>
+            {/* The card's own price, formatting and all, so the recap never
+                disagrees with the list it was claimed from. */}
             <span className="recap-item-price">
-              {typeof item.price === "number" ? formatPrice(item.price) : "—"}
+              {formatPrice(item) || "—"}
             </span>
             <button
               type="button"
