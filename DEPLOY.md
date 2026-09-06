@@ -97,10 +97,21 @@ owned by a real Google account, not created by the service account.
 
 The app matches columns by their headings rather than their position, so the
 tab keeps whatever layout its owner gave it. `README.md` step 1 documents the
-headings it understands and how sections, prices and links are read. Two
-columns are required: the item column (`Quoi?` / `Item`) and `Réservé par` /
-`ReservedBy`, where a guest's name is written. Adding a `Réservé le` column
-gets each claim timestamped; without it, claims just aren't timestamped.
+headings it understands and how sections, prices and links are read.
+
+Two columns are required: the item column (`Quoi?` / `Item`) and `Réservé par`
+/ `ReservedBy`, where a guest's name is written and cleared again when they
+undo. Everything else is optional and additive:
+
+- `Prix` / `Price` and `Catégorie` / `Category` turn on the filters, the
+  grouped sections, and the total in each guest's reservation recap. A
+  category can also come from a section heading merged across the table, which
+  is how the sheet this was built against already groups its rows.
+- `Réservé le` / `ReservedAt` timestamps each claim; without it, claims simply
+  aren't timestamped.
+- `Réservé` / `Reserved` is a leftover from the original fixed layout. A sheet
+  that has it keeps working — it's written and cleared alongside the name —
+  but nothing needs it: a name in `Réservé par` is what marks a row taken.
 
 Remaining steps:
 
