@@ -17,6 +17,10 @@ weddings, ...) rather than generalizing up front.
 - The gift list lives entirely in a Google Sheet you control. Add/remove/edit
   items there — the app always reads it live, nothing is duplicated.
 - The public page (`/`) shows only items not yet claimed.
+- Each item can carry a **Category** and a **Price**. Both are optional, and
+  both drive the browsing UI: items are grouped into collapsible sections by
+  category, and guests can narrow the list by category and by a min/max price
+  range. See [Categories and prices](#categories-and-prices).
 - `/admin` (password protected) generates a personal link + QR code per
   guest — e.g. `https://your-app.vercel.app/?g=Grandma%20Linda`. Opening that
   link pre-fills their name, so claiming is a single tap.
@@ -41,13 +45,20 @@ weddings, ...) rather than generalizing up front.
 2. Name a tab (default expected name: `Items`) and add this header row,
    exactly in this column order:
 
-   | A | B | C | D | E | F |
-   |---|---|---|---|---|---|
-   | Item | Link | Notes | Reserved | ReservedBy | ReservedAt |
+   | A | B | C | D | E | F | G | H |
+   |---|---|---|---|---|---|---|---|
+   | Item | Link | Notes | Reserved | ReservedBy | ReservedAt | Category | Price |
 
 3. Starting on row 2, add one row per gift idea. Only **Item** is required —
-   `Link` (e.g. an Amazon URL) and `Notes` are optional. Leave `Reserved`,
-   `ReservedBy`, and `ReservedAt` blank; the app fills those in.
+   `Link` (e.g. an Amazon URL), `Notes`, `Category` and `Price` are all
+   optional. Leave `Reserved`, `ReservedBy`, and `ReservedAt` blank; the app
+   fills those in.
+
+   > **Already running an older sheet?** `Category` and `Price` were added
+   > after the fact, which is exactly why they sit at the end instead of next
+   > to `Item`. An existing sheet keeps working untouched — both columns just
+   > read as empty. Add the two headers in G and H whenever you want the
+   > filters and the grouped sections.
 4. Copy the Sheet ID out of the URL:
    `https://docs.google.com/spreadsheets/d/`**`THIS_PART`**`/edit`
 
@@ -108,6 +119,42 @@ Visit `http://localhost:3000` for the guest list, and
 Go to `/admin`, enter the password, type a guest's name, and you'll get a
 shareable link plus a QR code image (long-press or right-click to save it).
 Send the link by text/email, or print the QR code for a shower.
+
+## Categories and prices
+
+Both columns are free text, and both are optional — fill in as much or as
+little as you like.
+
+**Category (column G)** is whatever wording you want: `Chambre`, `Repas`,
+`Vêtements`. Every distinct value becomes its own collapsible section on the
+public page, and guests get a row of category chips to filter with. Sections
+appear in the order their category first shows up in the sheet, so you set the
+running order by arranging rows. Items with an empty `Category` collect in a
+"Sans catégorie" section at the bottom. If no row has a category at all, the
+page stays the plain flat list it was before.
+
+**Price (column H)** is used two ways: to show a price on the item, and to
+power the min/max filter. It's read leniently, so you don't have to think
+about formatting:
+
+- Either decimal separator works — `25,50` and `25.50` both mean 25.50.
+- Currency symbols and thousands separators are fine — `39,90 €`, `$1,299.00`,
+  `1 299,00 EUR` all parse.
+- The cell is displayed **exactly as the sheet shows it**, so a cell you
+  formatted as `$45.00` stays `$45.00` — the app won't convert or re-format
+  your currency. A bare number like `25` has no currency of its own, so it's
+  shown as `25 €`.
+- Anything with no number in it (`offert`, `à voir`) is shown on the item just
+  as you wrote it, but counts as "no price" for the filter — see below.
+
+Two things worth knowing about how the filters behave:
+
+- Selecting several category chips widens the list (`Repas` **or**
+  `Vêtements`), it doesn't narrow it. No chips selected means no category
+  filter.
+- Setting a min or max hides items that have no price, since there's no honest
+  way to place them in a range. The app says how many are hidden right under
+  the filters, so nobody wonders where something went.
 
 ## Notes & limits
 

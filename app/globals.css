@@ -163,9 +163,26 @@ input:focus {
   min-width: 0;
 }
 
+.item-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+
 .item-name {
   font-weight: 600;
   font-size: 1.02rem;
+}
+
+.item-price {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent-dark);
+  background: var(--bg);
+  border-radius: 999px;
+  padding: 2px 9px;
+  white-space: nowrap;
 }
 
 .item-notes {
@@ -235,4 +252,168 @@ button:disabled {
 .hint {
   font-size: 0.8rem;
   color: var(--sub);
+}
+
+/* --- Filters ------------------------------------------------------------ */
+
+.filters {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.filters-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.filters-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--sub);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.filter-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-label {
+  font-size: 0.85rem;
+  color: var(--sub);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Chips opt out of the global pill button: they read as toggles, not as the
+   one call to action on the card. */
+.chip {
+  background: var(--bg);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  font-size: 0.86rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chip:hover:not(:disabled) {
+  background: var(--bg);
+  border-color: var(--accent);
+}
+
+.chip-on,
+.chip-on:hover:not(:disabled) {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.chip-count {
+  font-size: 0.76rem;
+  opacity: 0.7;
+  font-variant-numeric: tabular-nums;
+}
+
+.price-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.price-input {
+  width: 100%;
+  min-width: 0;
+  max-width: 120px;
+  font-size: 0.95rem;
+  padding: 8px 10px;
+}
+
+.price-dash {
+  color: var(--sub);
+}
+
+.filters-summary {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--sub);
+}
+
+/* --- Collapsible category sections -------------------------------------- */
+
+.groups {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Also opts out of the global pill button — it's a section header first. */
+.group-header {
+  width: 100%;
+  background: none;
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 6px 4px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  text-align: left;
+}
+
+.group-header:hover:not(:disabled) {
+  background: var(--card);
+}
+
+.group-caret {
+  color: var(--sub);
+  font-size: 0.8rem;
+  line-height: 1;
+  transition: transform 0.15s ease;
+}
+
+.group-caret-closed {
+  transform: rotate(-90deg);
+}
+
+.group-title {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.group-count {
+  color: var(--sub);
+  font-size: 0.82rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.empty-none {
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--sub);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .group-caret {
+    transition: none;
+  }
 }
