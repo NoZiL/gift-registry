@@ -19,8 +19,8 @@ const NO_CATEGORY_FILTER = new Set();
 
 export default function ReserveList({
   items,
-  hidden,
-  restored,
+  claimed,
+  released,
   guestName,
   resolveName,
   onClaimed,
@@ -95,15 +95,11 @@ export default function ReserveList({
     setSelected(new Set());
   }
 
-  // What is still up for grabs. Items released this visit rejoin the ones the
-  // page was rendered with — the id is the sheet's row number, so sorting by it
-  // puts everything back in the sheet's order however it got here.
-  const byId = new Map();
-  for (const item of items) if (!hidden[item.id]) byId.set(item.id, item);
-  for (const item of Object.values(restored)) {
-    if (!hidden[item.id]) byId.set(item.id, item);
-  }
-  const unclaimed = [...byId.values()].sort((a, b) => a.id - b.id);
+  // Every item stays on the list; what was claimed or released this visit
+  // overrides the state the page was rendered with.
+  const isReserved = (item) =>
+    Boolean(claimed[item.id]) || (item.reserved && !released[item.id]);
+  const anyFree = items.some((i) => !isReserved(i));
 
   // A field holding no digits at all just doesn't constrain the list, which is
   // gentler than an error under something still being typed. Digits anywhere
@@ -113,14 +109,14 @@ export default function ReserveList({
   const priceActive = min != null || max != null;
   const active = priceActive || selected.size > 0;
 
-  const visible = unclaimed.filter((i) =>
+  const visible = items.filter((i) =>
     matchesFilter(i, { categories: selected, min, max })
   );
 
   // Chip counts describe what picking that chip *would* show, so they answer
   // the price filter but not the category one — otherwise every unpicked chip
   // would read 0 as soon as one was picked.
-  const priceMatched = unclaimed.filter((i) =>
+  const priceMatched = items.filter((i) =>
     matchesFilter(i, { categories: NO_CATEGORY_FILTER, min, max })
   );
   const countByCategory = new Map();
@@ -128,10 +124,10 @@ export default function ReserveList({
     const key = categoryOf(item);
     countByCategory.set(key, (countByCategory.get(key) || 0) + 1);
   }
-  // Built from every unclaimed item rather than from `priceMatched`, so a chip
+  // Built from every item rather than from `priceMatched`, so a chip
   // that is currently selected never vanishes out from under the guest before
   // they can unselect it.
-  const categories = groupByCategory(unclaimed).map(({ category }) => ({
+  const categories = groupByCategory(items).map(({ category }) => ({
     name: category,
     count: countByCategory.get(category) || 0,
   }));
@@ -139,7 +135,7 @@ export default function ReserveList({
   // A price bound drops the items that have no price at all. Say how many, so
   // a guest who knows the list doesn't think something went missing.
   const hiddenNoPrice = priceActive
-    ? unclaimed.filter(
+    ? items.filter(
         (i) =>
           i.price == null &&
           (selected.size === 0 || selected.has(categoryOf(i)))
@@ -148,13 +144,14 @@ export default function ReserveList({
 
   // Only worth showing the controls when the sheet has something to filter on.
   const hasCategories = categories.some((c) => c.name !== UNCATEGORIZED);
-  const hasPrices = unclaimed.some((i) => i.price != null);
+  const hasPrices = items.some((i) => i.price != null);
   const showFilters = hasCategories || hasPrices;
 
   function renderItem(item) {
     const price = formatPrice(item);
+    const reserved = isReserved(item);
     return (
-      <li key={item.id} className="item">
+      <li key={item.id} className={`item${reserved ? " item-reserved" : ""}`}>
         <ItemThumb item={item} />
         <div className="item-main">
           <span className="item-head">
@@ -174,9 +171,13 @@ export default function ReserveList({
             </a>
           )}
         </div>
-        <button onClick={() => handleReserve(item.id)} disabled={busyId === item.id}>
-          {busyId === item.id ? "Enregistrement…" : "Je m'en occupe"}
-        </button>
+        {reserved ? (
+          <span className="item-badge">Réservé</span>
+        ) : (
+          <button onClick={() => handleReserve(item.id)} disabled={busyId === item.id}>
+            {busyId === item.id ? "Enregistrement…" : "Je m'en occupe"}
+          </button>
+        )}
       </li>
     );
   }
@@ -185,7 +186,7 @@ export default function ReserveList({
     <div>
       {error && <p className="error">{error}</p>}
 
-      {showFilters && unclaimed.length > 0 && (
+      {showFilters && items.length > 0 && (
         <ItemFilters
           categories={categories}
           selected={selected}
@@ -197,7 +198,7 @@ export default function ReserveList({
           onReset={resetFilters}
           active={active}
           shown={visible.length}
-          total={unclaimed.length}
+          total={items.length}
           hiddenNoPrice={hiddenNoPrice}
         />
       )}
@@ -223,11 +224,13 @@ export default function ReserveList({
         <ul className="items">{visible.map(renderItem)}</ul>
       )}
 
-      {unclaimed.length === 0 && items.length > 0 && (
+      {/* Only when this visit took the last free ones — a list that was fully
+          reserved before the guest arrived already says so above it. */}
+      {!anyFree && items.some((i) => !i.reserved) && (
         <p className="empty">Merci d'avoir réservé — c'est noté ! 💛</p>
       )}
 
-      {unclaimed.length > 0 && visible.length === 0 && (
+      {items.length > 0 && visible.length === 0 && (
         <p className="empty empty-none">
           Aucun article ne correspond à ces filtres.{" "}
           <button type="button" className="link-button" onClick={resetFilters}>

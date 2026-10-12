@@ -98,10 +98,9 @@ export default function ReservationRecap({ name, version, onReleased }) {
           <li key={item.id} className="recap-item">
             <span className="recap-item-main">
               <span className="recap-item-name">{item.item}</span>
-              {/* The claimed item has left the list, and with it the only
-                  place the link was shown — so the recap carries it. It's
-                  what a guest needs *after* reserving: the shop page to
-                  actually go and buy from. */}
+              {/* The claimed item is greyed out in the list below, so the
+                  recap carries the link too. It's what a guest needs *after*
+                  reserving: the shop page to actually go and buy from. */}
               {item.link && (
                 <a
                   href={item.link}

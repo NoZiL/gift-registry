@@ -20,7 +20,10 @@ weddings, ...) rather than generalizing up front.
   rather than their position, the title and intro above the table carry over
   to the page, and a `Lien` cell reading "ICI" is followed to the URL behind
   it. See step 1 for the details.
-- The public page (`/`) shows only items not yet claimed.
+- The public page (`/`) shows every item. Ones already claimed stay in place,
+  greyed out, with a **Réservé** badge instead of the claim button — so guests
+  see the whole list and what's already covered. Who claimed what is never
+  sent to the browser; only the family sees names, in the sheet.
 - Each item can carry a **category**, a **price** and a **shop**. All are
   optional, and the first two drive the browsing UI: items are grouped into
   collapsible sections by category, and guests can narrow the list by category
@@ -65,10 +68,9 @@ weddings, ...) rather than generalizing up front.
   The recap prices each item from the same price column the cards and the
   filters read, so the three always agree. Items with no price still appear in
   the recap; they're left out of the total, and the recap says how many.
-  Each line also repeats the item's **Voir l'article** link: claiming an item
-  takes it out of the list, and the list was the only place the link was
-  shown — but the link is exactly what a guest needs *after* reserving, to go
-  and buy the thing. Lines whose sheet row has no `Lien` simply don't show one.
+  Each line also repeats the item's **Voir l'article** link: it's exactly
+  what a guest needs *after* reserving, to go and buy the thing, and the
+  greyed-out card in the list is easy to scroll past. Lines whose sheet row has no `Lien` simply don't show one.
 
 ## 1. Set up the Google Sheet
 

@@ -19,13 +19,13 @@ export default function GuestSection({ items, urlName }) {
   const [draft, setDraft] = useState(urlName);
   const [editing, setEditing] = useState(!urlName);
 
-  // The page was rendered from the items that were free at that moment, so
-  // claiming and releasing are tracked here rather than by re-rendering it:
-  // `hidden` drops what was just claimed, `restored` puts back what was just
-  // released — including an item claimed on an earlier visit, which the server
-  // never sent us in the first place.
-  const [hidden, setHidden] = useState({});
-  const [restored, setRestored] = useState({});
+  // The page was rendered with each item's state at that moment, so claiming
+  // and releasing are tracked here rather than by re-rendering it: `claimed`
+  // marks what was just taken, `released` frees what was just handed back —
+  // including an item claimed on an earlier visit, which the server rendered
+  // as reserved.
+  const [claimed, setClaimed] = useState({});
+  const [released, setReleased] = useState({});
   // Bumped whenever the sheet changed under the recap, so it re-reads.
   const [recapVersion, setRecapVersion] = useState(0);
 
@@ -66,11 +66,11 @@ export default function GuestSection({ items, urlName }) {
     return clean ? commit(clean) : "";
   }
 
-  // `mine` is false when someone else got there first: the item still leaves
-  // the list, but there's nothing new in the recap to go and read.
+  // `mine` is false when someone else got there first: the item still shows
+  // as reserved, but there's nothing new in the recap to go and read.
   function handleClaimed(id, mine) {
-    setHidden((h) => ({ ...h, [id]: true }));
-    setRestored((r) => {
+    setClaimed((c) => ({ ...c, [id]: true }));
+    setReleased((r) => {
       if (!(id in r)) return r;
       const next = { ...r };
       delete next[id];
@@ -80,13 +80,13 @@ export default function GuestSection({ items, urlName }) {
   }
 
   function handleReleased(item) {
-    setHidden((h) => {
-      if (!(item.id in h)) return h;
-      const next = { ...h };
+    setClaimed((c) => {
+      if (!(item.id in c)) return c;
+      const next = { ...c };
       delete next[item.id];
       return next;
     });
-    setRestored((r) => ({ ...r, [item.id]: item }));
+    setReleased((r) => ({ ...r, [item.id]: true }));
   }
 
   return (
@@ -124,8 +124,8 @@ export default function GuestSection({ items, urlName }) {
 
       <ReserveList
         items={items}
-        hidden={hidden}
-        restored={restored}
+        claimed={claimed}
+        released={released}
         guestName={name}
         resolveName={resolveName}
         onClaimed={handleClaimed}

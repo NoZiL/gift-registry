@@ -351,6 +351,43 @@ input:focus {
   text-decoration: underline;
 }
 
+/* Someone already has this one. It stays on the list so guests see the whole
+   picture, but greyed out and with nothing to tap but the link. */
+.item-reserved {
+  background: #f6f2ef;
+}
+
+.item-reserved .thumb,
+.item-reserved .item-head,
+.item-reserved .item-store,
+.item-reserved .item-notes {
+  opacity: 0.55;
+}
+
+.item-reserved .thumb {
+  filter: grayscale(1);
+}
+
+.item-reserved .item-price {
+  color: var(--sub);
+}
+
+.item-reserved .item-link {
+  color: var(--sub);
+}
+
+.item-badge {
+  flex: none;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--sub);
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 button {
   background: var(--accent);
   color: #fff;
@@ -694,6 +731,11 @@ button:disabled {
   .item > button {
     grid-column: 1 / -1;
     width: 100%;
+  }
+
+  .item > .item-badge {
+    grid-column: 1 / -1;
+    text-align: center;
   }
 }
 
