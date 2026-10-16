@@ -71,9 +71,9 @@ const STEPS = [
     title: "Réservez ce que vous voulez offrir",
     body: (
       <>
-        Touchez <b>Je m'en occupe</b> sur le cadeau choisi. Il disparaît alors de
-        la liste des autres invités, pour que personne n'achète la même chose en
-        double. Vous pouvez en réserver plusieurs.
+        Touchez <b>Je m'en occupe</b> sur le cadeau choisi. Il apparaît alors grisé,
+        avec la mention <b>Réservé</b>, pour que personne n'achète la même chose
+        en double. Vous pouvez en réserver plusieurs.
       </>
     ),
   },
@@ -104,7 +104,7 @@ const STEPS = [
     body: (
       <>
         Dans <b>Vos réservations</b>, touchez <b>Annuler</b> à côté de l'article :
-        il retourne aussitôt dans la liste et quelqu'un d'autre pourra le prendre.
+        il redevient aussitôt disponible et quelqu'un d'autre pourra le prendre.
         Aucun souci, et personne n'est prévenu.
       </>
     ),
@@ -123,7 +123,7 @@ const NOTES = [
   </>,
   <>
     La liste se met à jour toute seule : les cadeaux déjà réservés par quelqu'un
-    d'autre n'apparaissent plus. Si elle vous semble vide ou étrange, actualisez
+    d'autre apparaissent grisés, avec la mention « Réservé ». Si elle vous semble vide ou étrange, actualisez
     la page.
   </>,
   <>

@@ -31,7 +31,11 @@ export default async function Home({ searchParams }) {
   // written — so they can be reworded without a deploy.
   const title = registry.title || DEFAULT_TITLE;
   const intro = registry.intro.length ? registry.intro : DEFAULT_INTRO;
-  const available = registry.items.filter((i) => !i.reserved);
+  // Reserved items stay on the page, greyed out, so guests can see the whole
+  // list and what's already covered. Who reserved them is the family's
+  // business, not every guest's: the names never leave the server.
+  const items = registry.items.map(({ reservedBy, reservedAt, ...item }) => item);
+  const allReserved = items.length > 0 && items.every((i) => i.reserved);
 
   return (
     <main className="wrap">
@@ -49,11 +53,11 @@ export default async function Home({ searchParams }) {
         </p>
       )}
 
-      {!loadFailed && available.length === 0 && (
+      {!loadFailed && allReserved && (
         <p className="empty">Tout a été réservé — merci beaucoup ! 💛</p>
       )}
 
-      <GuestSection items={available} urlName={urlName} />
+      <GuestSection items={items} urlName={urlName} />
     </main>
   );
 }
