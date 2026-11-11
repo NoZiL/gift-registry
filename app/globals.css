@@ -8,6 +8,9 @@
   --accent-dark: #74171a;
   --border: #f0d8cb;
   --success: #5f7356;
+  --error: #c0392b;
+  --error-ink: #a33;
+  --error-bg: #fdecec;
   --script: var(--font-script), "Brush Script MT", cursive;
   --serif: var(--font-serif), Georgia, "Times New Roman", serif;
   --ui: var(--font-ui), Georgia, "Times New Roman", serif;
@@ -235,8 +238,8 @@ h1 {
 }
 
 .error {
-  background: #fdecec;
-  color: #a33;
+  background: var(--error-bg);
+  color: var(--error-ink);
   padding: 10px 14px;
   border-radius: 10px;
   font-size: 0.9rem;
@@ -261,6 +264,29 @@ h1 {
   padding: 14px 16px;
   border-radius: 12px;
   border: 1px solid var(--border);
+}
+
+.name-box-invalid {
+  border-color: var(--error);
+}
+
+.name-box-invalid label {
+  color: var(--error-ink);
+}
+
+.name-box input[aria-invalid="true"] {
+  border-color: var(--error);
+  background: var(--error-bg);
+  animation: name-shake 0.3s;
+}
+
+@keyframes name-shake {
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .name-box input[aria-invalid="true"] { animation: none; }
 }
 
 .name-box label {

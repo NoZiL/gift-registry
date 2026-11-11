@@ -9,6 +9,7 @@ export default function GuestName({
   name,
   draft,
   editing,
+  alert,
   onDraftChange,
   onEdit,
   onCancel,
@@ -17,16 +18,30 @@ export default function GuestName({
   const inputRef = useRef(null);
   const wasEditing = useRef(editing);
 
-  // Focus only when the editor is *opened*, never on mount: a plain first
-  // visit already starts in edit mode, and stealing focus there scrolls the
-  // list away and pops the keyboard open on mobile.
+  // One effect decides where focus goes. A claim attempted with no name
+  // (`alert`) scrolls the field into view and focuses it; otherwise focus only
+  // when the editor is *opened*, never on mount: a plain first visit already
+  // starts in edit mode, and stealing focus there scrolls the list away and
+  // pops the keyboard open on mobile.
   useEffect(() => {
-    if (editing && !wasEditing.current) {
-      inputRef.current?.focus();
-      inputRef.current?.select();
+    const input = inputRef.current;
+    if (editing && input && alert) {
+      input.scrollIntoView({ behavior: "smooth", block: "center" });
+      input.focus({ preventScroll: true });
+      // The input is already marked invalid on a repeat attempt, so restart
+      // the shake by hand.
+      input.getAnimations?.().forEach((a) => {
+        a.cancel();
+        a.play();
+      });
+    } else if (editing && !wasEditing.current) {
+      input?.focus();
+      input?.select();
     }
     wasEditing.current = editing;
-  }, [editing]);
+  }, [editing, alert]);
+
+  const invalid = alert > 0;
 
   if (!editing) {
     return (
@@ -44,7 +59,7 @@ export default function GuestName({
 
   return (
     <form
-      className="name-box"
+      className={`name-box${invalid ? " name-box-invalid" : ""}`}
       onSubmit={(e) => {
         e.preventDefault();
         onSave(draft);
@@ -56,6 +71,7 @@ export default function GuestName({
         ref={inputRef}
         value={draft}
         maxLength={NAME_MAX}
+        aria-invalid={invalid || undefined}
         onChange={(e) => onDraftChange(e.target.value)}
         placeholder="ex. Mamie Christiane"
       />

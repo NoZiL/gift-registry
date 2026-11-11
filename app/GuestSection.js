@@ -18,6 +18,10 @@ export default function GuestSection({ items, urlName }) {
   const [name, setName] = useState(urlName);
   const [draft, setDraft] = useState(urlName);
   const [editing, setEditing] = useState(!urlName);
+  // Bumped each time a claim is attempted without a name: the field scrolls
+  // into view and turns red. 0 means no alert; it is reset as soon as the
+  // guest types, saves or cancels.
+  const [nameAlert, setNameAlert] = useState(0);
 
   // The page was rendered with each item's state at that moment, so claiming
   // and releasing are tracked here rather than by re-rendering it: `claimed`
@@ -50,20 +54,35 @@ export default function GuestSection({ items, urlName }) {
     syncNameToUrl(clean);
     // A cleared name leaves the field open rather than showing an empty label.
     setEditing(!clean);
+    setNameAlert(0);
     return clean;
+  }
+
+  function flagMissingName() {
+    setEditing(true);
+    setNameAlert((n) => n + 1);
   }
 
   // Claiming with the editor open and a name typed into it is intent enough —
   // don't reject the guest for not having pressed "Enregistrer" first.
   function resolveName() {
     if (!editing) {
-      if (!name) setEditing(true);
+      if (!name) flagMissingName();
       return name;
     }
     const clean = sanitizeName(draft);
     // An empty field is a prompt to fill it in, not an instruction to forget
-    // a name that was already saved.
-    return clean ? commit(clean) : "";
+    // a name that was already saved: fall back on it and close the editor.
+    if (!clean) {
+      if (!name) {
+        flagMissingName();
+        return "";
+      }
+      setDraft(name);
+      setEditing(false);
+      return name;
+    }
+    return commit(clean);
   }
 
   // `mine` is false when someone else got there first: the item still shows
@@ -104,13 +123,19 @@ export default function GuestSection({ items, urlName }) {
         name={name}
         draft={draft}
         editing={editing}
-        onDraftChange={setDraft}
+        alert={nameAlert}
+        onDraftChange={(v) => {
+          setDraft(v);
+          if (v.trim()) setNameAlert(0);
+        }}
         onEdit={() => {
           setDraft(name);
+          setNameAlert(0);
           setEditing(true);
         }}
         onCancel={() => {
           setDraft(name);
+          setNameAlert(0);
           setEditing(false);
         }}
         onSave={commit}
