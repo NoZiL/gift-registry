@@ -10,6 +10,26 @@
   --success: #5f7356;
   --script: var(--font-script), "Brush Script MT", cursive;
   --serif: var(--font-serif), Georgia, "Times New Roman", serif;
+  --ui: var(--font-ui), Georgia, "Times New Roman", serif;
+}
+
+/* Arapey has no bold, so everything set in bold uses Lora instead of a
+   browser-faked bold. */
+button,
+b,
+strong,
+h2,
+.cagnotte-button,
+.name-box-value,
+.recap-total-value,
+.item-name,
+.item-price,
+.item-badge,
+.howto-step::before,
+.howto-step-title,
+.howto-notes-title,
+.filters-title {
+  font-family: var(--ui);
 }
 
 * {
@@ -178,6 +198,7 @@ h1 {
   padding: 10px 22px;
   border-radius: 999px;
   font-size: 1rem;
+  font-weight: 600;
   letter-spacing: 0.02em;
   transition: background 0.15s ease;
 }
@@ -292,8 +313,7 @@ h1 {
   color: var(--ink);
 }
 
-input,
-button {
+input {
   font-family: inherit;
 }
 
