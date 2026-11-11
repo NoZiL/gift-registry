@@ -75,6 +75,29 @@ h1 {
   border: 1px solid var(--border);
 }
 
+.name-box-invalid {
+  border-color: #c0392b;
+}
+
+.name-box-invalid label {
+  color: #a33;
+}
+
+.name-box input[aria-invalid="true"] {
+  border-color: #c0392b;
+  background: #fdecec;
+  animation: name-shake 0.3s;
+}
+
+@keyframes name-shake {
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .name-box input[aria-invalid="true"] { animation: none; }
+}
+
 .name-box label {
   font-size: 0.85rem;
   color: var(--sub);

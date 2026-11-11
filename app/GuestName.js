@@ -9,6 +9,8 @@ export default function GuestName({
   name,
   draft,
   editing,
+  invalid,
+  alert,
   onDraftChange,
   onEdit,
   onCancel,
@@ -28,6 +30,16 @@ export default function GuestName({
     wasEditing.current = editing;
   }, [editing]);
 
+  // A claim attempted with no name: bring the field into view and focus it.
+  // Runs after render, so the input exists even if the editor was just opened.
+  useEffect(() => {
+    if (!alert) return;
+    const input = inputRef.current;
+    if (!input) return;
+    input.scrollIntoView({ behavior: "smooth", block: "center" });
+    input.focus({ preventScroll: true });
+  }, [alert]);
+
   if (!editing) {
     return (
       <div className="name-box name-box-view">
@@ -44,7 +56,7 @@ export default function GuestName({
 
   return (
     <form
-      className="name-box"
+      className={`name-box${invalid ? " name-box-invalid" : ""}`}
       onSubmit={(e) => {
         e.preventDefault();
         onSave(draft);
@@ -56,6 +68,7 @@ export default function GuestName({
         ref={inputRef}
         value={draft}
         maxLength={NAME_MAX}
+        aria-invalid={invalid || undefined}
         onChange={(e) => onDraftChange(e.target.value)}
         placeholder="ex. Mamie Christiane"
       />

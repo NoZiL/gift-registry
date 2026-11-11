@@ -18,6 +18,10 @@ export default function GuestSection({ items, urlName }) {
   const [name, setName] = useState(urlName);
   const [draft, setDraft] = useState(urlName);
   const [editing, setEditing] = useState(!urlName);
+  // Bumped each time a claim is attempted without a name: the field scrolls
+  // into view and turns red until a name is typed.
+  const [nameAlert, setNameAlert] = useState(0);
+  const [nameInvalid, setNameInvalid] = useState(false);
 
   // The page was rendered with each item's state at that moment, so claiming
   // and releasing are tracked here rather than by re-rendering it: `claimed`
@@ -53,17 +57,28 @@ export default function GuestSection({ items, urlName }) {
     return clean;
   }
 
+  function flagMissingName() {
+    setEditing(true);
+    setNameInvalid(true);
+    setNameAlert((n) => n + 1);
+  }
+
   // Claiming with the editor open and a name typed into it is intent enough —
   // don't reject the guest for not having pressed "Enregistrer" first.
   function resolveName() {
     if (!editing) {
-      if (!name) setEditing(true);
+      if (!name) flagMissingName();
       return name;
     }
     const clean = sanitizeName(draft);
     // An empty field is a prompt to fill it in, not an instruction to forget
     // a name that was already saved.
-    return clean ? commit(clean) : "";
+    if (!clean) {
+      flagMissingName();
+      return "";
+    }
+    setNameInvalid(false);
+    return commit(clean);
   }
 
   // `mine` is false when someone else got there first: the item still shows
@@ -104,7 +119,12 @@ export default function GuestSection({ items, urlName }) {
         name={name}
         draft={draft}
         editing={editing}
-        onDraftChange={setDraft}
+        invalid={nameInvalid}
+        alert={nameAlert}
+        onDraftChange={(v) => {
+          setDraft(v);
+          if (v.trim()) setNameInvalid(false);
+        }}
         onEdit={() => {
           setDraft(name);
           setEditing(true);
