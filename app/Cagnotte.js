@@ -17,7 +17,7 @@ export default function Cagnotte({ url }) {
       <a className="cagnotte-button" href={url} target="_blank" rel="noopener noreferrer">
         Participer à la cagnotte
       </a>
-      <p className="cagnotte-note">S'ouvre sur le site participe.fr</p>
+      <p className="cagnotte-note">S'ouvre sur le site onparticipe.fr</p>
     </section>
   );
 }

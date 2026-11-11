@@ -293,7 +293,7 @@ deep red ink, its two typefaces (Parisienne and Arapey, loaded with
 `next/font`), and the floral wreath and icons lifted from the card itself
 (`public/`). Her name, birth date and measurements live in `lib/site.js`.
 
-A **cagnotte** block, under the intro, links to the participe.fr money pot
+A **cagnotte** block, under the intro, links to the onparticipe.fr money pot
 for guests who'd rather contribute than pick an item. Set its address in the
 `CAGNOTTE_URL` environment variable on Vercel (or in `DEFAULT_CAGNOTTE_URL` in
 `lib/site.js`). Until one of them holds an `https://` link, the block is
