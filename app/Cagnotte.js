@@ -1,7 +1,7 @@
 import { BABY } from "../lib/site";
 
 // For guests who'd rather contribute to something bigger than pick an item:
-// a link out to the participe.fr money pot. Nothing to reserve, no name to
+// a link out to the onparticipe.fr money pot. Nothing to reserve, no name to
 // give here — the cagnotte site handles all of that on its side.
 export default function Cagnotte({ url }) {
   if (!url) return null;
