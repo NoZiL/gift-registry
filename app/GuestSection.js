@@ -19,9 +19,9 @@ export default function GuestSection({ items, urlName }) {
   const [draft, setDraft] = useState(urlName);
   const [editing, setEditing] = useState(!urlName);
   // Bumped each time a claim is attempted without a name: the field scrolls
-  // into view and turns red until a name is typed.
+  // into view and turns red. 0 means no alert; it is reset as soon as the
+  // guest types, saves or cancels.
   const [nameAlert, setNameAlert] = useState(0);
-  const [nameInvalid, setNameInvalid] = useState(false);
 
   // The page was rendered with each item's state at that moment, so claiming
   // and releasing are tracked here rather than by re-rendering it: `claimed`
@@ -54,12 +54,12 @@ export default function GuestSection({ items, urlName }) {
     syncNameToUrl(clean);
     // A cleared name leaves the field open rather than showing an empty label.
     setEditing(!clean);
+    setNameAlert(0);
     return clean;
   }
 
   function flagMissingName() {
     setEditing(true);
-    setNameInvalid(true);
     setNameAlert((n) => n + 1);
   }
 
@@ -72,12 +72,16 @@ export default function GuestSection({ items, urlName }) {
     }
     const clean = sanitizeName(draft);
     // An empty field is a prompt to fill it in, not an instruction to forget
-    // a name that was already saved.
+    // a name that was already saved: fall back on it and close the editor.
     if (!clean) {
-      flagMissingName();
-      return "";
+      if (!name) {
+        flagMissingName();
+        return "";
+      }
+      setDraft(name);
+      setEditing(false);
+      return name;
     }
-    setNameInvalid(false);
     return commit(clean);
   }
 
@@ -119,18 +123,19 @@ export default function GuestSection({ items, urlName }) {
         name={name}
         draft={draft}
         editing={editing}
-        invalid={nameInvalid}
         alert={nameAlert}
         onDraftChange={(v) => {
           setDraft(v);
-          if (v.trim()) setNameInvalid(false);
+          if (v.trim()) setNameAlert(0);
         }}
         onEdit={() => {
           setDraft(name);
+          setNameAlert(0);
           setEditing(true);
         }}
         onCancel={() => {
           setDraft(name);
+          setNameAlert(0);
           setEditing(false);
         }}
         onSave={commit}

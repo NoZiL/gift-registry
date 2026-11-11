@@ -7,6 +7,9 @@
   --accent-dark: #c96f6f;
   --border: #f0e2da;
   --success: #6f9c76;
+  --error: #c0392b;
+  --error-ink: #a33;
+  --error-bg: #fdecec;
 }
 
 * {
@@ -48,8 +51,8 @@ h1 {
 }
 
 .error {
-  background: #fdecec;
-  color: #a33;
+  background: var(--error-bg);
+  color: var(--error-ink);
   padding: 10px 14px;
   border-radius: 10px;
   font-size: 0.9rem;
@@ -76,16 +79,16 @@ h1 {
 }
 
 .name-box-invalid {
-  border-color: #c0392b;
+  border-color: var(--error);
 }
 
 .name-box-invalid label {
-  color: #a33;
+  color: var(--error-ink);
 }
 
 .name-box input[aria-invalid="true"] {
-  border-color: #c0392b;
-  background: #fdecec;
+  border-color: var(--error);
+  background: var(--error-bg);
   animation: name-shake 0.3s;
 }
 
