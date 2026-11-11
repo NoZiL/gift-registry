@@ -285,3 +285,17 @@ to fill in an `Image` cell by hand for that row.
 - If you'd rather not deploy this yourselves, mention it and it can be
   walked through interactively, or deployed directly given the right
   credentials.
+
+## Faire-part look and the cagnotte
+
+The page is styled after Victoire's birth announcement: its blush paper and
+deep red ink, its two typefaces (Parisienne and Arapey, loaded with
+`next/font`), and the floral wreath and icons lifted from the card itself
+(`public/`). Her name, birth date and measurements live in `lib/site.js`.
+
+A **cagnotte** block, under the intro, links to the onparticipe.fr money pot
+for guests who'd rather contribute than pick an item. Set its address in the
+`CAGNOTTE_URL` environment variable on Vercel (or in `DEFAULT_CAGNOTTE_URL` in
+`lib/site.js`). A defined `CAGNOTTE_URL` always wins, so setting it to an
+empty value takes the block down once the pot closes. Anything that isn't a
+valid `https://` address hides it too, rather than showing a broken button.
