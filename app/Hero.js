@@ -1,11 +1,12 @@
 import { BABY } from "../lib/site";
 
 // The top of the page, drawn after the faire-part: the floral wreath framing
-// her name, then the three numbers from the back of the card.
+// her name, then the three numbers from the back of the card. Icon sizes are
+// the PNGs' pixel dimensions.
 const STATS = [
-  { icon: "/icon-weight.png", label: "Poids", value: BABY.weight, w: 201 },
-  { icon: "/icon-length.png", label: "Taille", value: BABY.length, w: 121 },
-  { icon: "/icon-time.png", label: "Heure de naissance", value: BABY.time, w: 158 },
+  { icon: "/icon-weight.png", label: "Poids", value: BABY.weight, w: 201, h: 158 },
+  { icon: "/icon-length.png", label: "Taille", value: BABY.length, w: 121, h: 158 },
+  { icon: "/icon-time.png", label: "Heure de naissance", value: BABY.time, w: 158, h: 158 },
 ];
 
 export default function Hero() {
@@ -28,8 +29,9 @@ export default function Hero() {
               className="stat-icon"
               src={s.icon}
               alt=""
-              width={Math.round((s.w * 44) / 158)}
-              height="44"
+              // The PNG's own size, for the aspect ratio; CSS sets the height.
+              width={s.w}
+              height={s.h}
             />
             <span className="visually-hidden">{s.label} : </span>
             <span className="stat-value">{s.value}</span>

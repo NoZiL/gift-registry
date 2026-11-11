@@ -7,7 +7,7 @@
   --accent: #971f21;
   --accent-dark: #74171a;
   --border: #f0d8cb;
-  --success: #971f21;
+  --success: #5f7356;
   --script: var(--font-script), "Brush Script MT", cursive;
   --serif: var(--font-serif), Georgia, "Times New Roman", serif;
 }
@@ -16,13 +16,17 @@
   box-sizing: border-box;
 }
 
+/* Arapey runs small; nudge the root up so every rem grows with it, relative
+   to whatever size the guest's browser is set to. */
+html {
+  font-size: 106.25%;
+}
+
 body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
   font-family: var(--serif);
-  /* Arapey runs small; this keeps it as readable as the old system font. */
-  font-size: 17px;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -33,6 +37,12 @@ body {
 }
 
 h1 {
+  font-size: 1.6rem;
+  margin: 0 0 8px;
+}
+
+/* The home page's heading, in the faire-part's script. */
+.page-title {
   font-family: var(--script);
   font-weight: 400;
   font-size: 2.6rem;
@@ -185,7 +195,6 @@ h1 {
   margin: 8px 0 0;
   color: var(--sub);
   font-size: 0.82rem;
-  font-style: italic;
 }
 
 .intro {

@@ -296,5 +296,6 @@ deep red ink, its two typefaces (Parisienne and Arapey, loaded with
 A **cagnotte** block, under the intro, links to the onparticipe.fr money pot
 for guests who'd rather contribute than pick an item. Set its address in the
 `CAGNOTTE_URL` environment variable on Vercel (or in `DEFAULT_CAGNOTTE_URL` in
-`lib/site.js`). Until one of them holds an `https://` link, the block is
-hidden rather than showing a dead button.
+`lib/site.js`). A defined `CAGNOTTE_URL` always wins, so setting it to an
+empty value takes the block down once the pot closes. Anything that isn't a
+valid `https://` address hides it too, rather than showing a broken button.

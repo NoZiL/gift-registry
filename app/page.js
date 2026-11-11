@@ -2,7 +2,7 @@ import { getRegistry } from "../lib/sheets";
 import GuestSection from "./GuestSection";
 import Hero from "./Hero";
 import Cagnotte from "./Cagnotte";
-import { getCagnotteUrl } from "../lib/site";
+import { getCagnotte } from "../lib/site";
 import { sanitizeName } from "../lib/guestName";
 
 // Always hit the sheet fresh — this is a low-traffic family app, no need to cache.
@@ -39,13 +39,13 @@ export default async function Home({ searchParams }) {
   // business, not every guest's: the names never leave the server.
   const items = registry.items.map(({ reservedBy, reservedAt, ...item }) => item);
   const allReserved = items.length > 0 && items.every((i) => i.reserved);
-  const cagnotteUrl = getCagnotteUrl();
+  const cagnotte = getCagnotte();
 
   return (
     <main className="wrap">
       <Hero />
 
-      <h1>{title}</h1>
+      <h1 className="page-title">{title}</h1>
       {intro.map((paragraph, i) => (
         <p className="intro" key={i}>
           {paragraph}
@@ -54,7 +54,7 @@ export default async function Home({ searchParams }) {
 
       {/* Right under the intro, so a guest who'd rather give money than pick
           an item finds out before scrolling the whole list. */}
-      <Cagnotte url={cagnotteUrl} />
+      <Cagnotte cagnotte={cagnotte} />
 
       {loadFailed && (
         <p className="error">
@@ -66,7 +66,7 @@ export default async function Home({ searchParams }) {
       {!loadFailed && allReserved && (
         <p className="empty">
           Tout a été réservé — merci beaucoup !
-          {cagnotteUrl && " Il reste toujours la cagnotte, juste au-dessus."}
+          {cagnotte && " Il reste toujours la cagnotte, juste au-dessus."}
         </p>
       )}
 

@@ -15,14 +15,13 @@ const script = Parisienne({
 const serif = Arapey({
   subsets: ["latin"],
   weight: "400",
-  style: ["normal", "italic"],
   variable: "--font-serif",
   display: "swap",
 });
 
 export const metadata = {
   title: `Liste de naissance de ${BABY.name}`,
-  description: `Bienvenue ${BABY.name}, née le ${BABY.birthDate} — réservez un cadeau de sa liste de naissance.`,
+  description: `Bienvenue ${BABY.name} ! Réservez un cadeau de sa liste de naissance.`,
 };
 
 export default function RootLayout({ children }) {
