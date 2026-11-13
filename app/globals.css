@@ -962,3 +962,47 @@ button:disabled {
     transition: none;
   }
 }
+
+/* --- Jump to the list -------------------------------------------------- */
+
+/* Leaves a little air above the list when the button scrolls to it. */
+.reserve-list {
+  scroll-margin-top: 16px;
+}
+
+.list-jump {
+  position: fixed;
+  left: 50%;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  z-index: 10;
+  padding: 12px 22px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 1rem;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px rgba(74, 28, 28, 0.28);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 16px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.list-jump-shown {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+}
+
+.list-jump:hover,
+.list-jump:focus-visible {
+  background: var(--accent-dark);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .list-jump {
+    transition: none;
+  }
+}

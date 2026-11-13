@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import GuestName from "./GuestName";
 import HowTo from "./HowTo";
+import ListJump from "./ListJump";
 import ReservationRecap from "./ReservationRecap";
 import ReserveList from "./ReserveList";
 import {
@@ -155,6 +156,8 @@ export default function GuestSection({ items, urlName }) {
         resolveName={resolveName}
         onClaimed={handleClaimed}
       />
+
+      {items.length > 0 && <ListJump targetId="liste" />}
     </>
   );
 }
